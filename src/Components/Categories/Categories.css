@@ -1,0 +1,77 @@
+.categories-container {
+  margin: 20px;
+  text-align: center; /* Center the header */
+}
+
+.categories-header {
+  margin-bottom: 20px; /* Space below header */
+  font-size: 2rem; /* Size up the header */
+  font-weight: bold;
+}
+
+.category-items {
+  display: flex;
+  justify-content: center; /* Center items */
+  gap: 40px; /* Increase space between items */
+  flex-wrap: wrap; /* Ensure items wrap on smaller screens */
+}
+
+.category-item {
+  width: 150px; /* Size up the circles */
+  height: 150px; /* Size up the circles */
+  border-radius: 50%; /* Make it circular */
+  overflow: hidden; /* Hide overflow */
+  cursor: pointer; /* Pointer on hover */
+  display: flex; /* Use flexbox to center the image */
+  align-items: center;
+  justify-content: center;
+  background-color: #f0f0f0; /* Background color (optional) */
+  transition: transform 0.3s ease; /* Animation effect */
+  flex-direction: column; /* Stacks image and title vertically */
+}
+
+.category-item:hover {
+  transform: scale(1.1); /* Slightly larger scale on hover */
+}
+
+.category-image {
+  width: 80px; /* Adjust image size to fit circle */
+  height: 80px;
+  object-fit: cover; /* Make sure the image covers the area */
+  border-radius: 50%;
+}
+
+.category-item h6 {
+  margin-top: 10px; /* Space between image and text */
+  font-size: 1rem;
+  color: #333;
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+  .category-item {
+    width: 120px; /* Slightly smaller circles for medium screens */
+    height: 120px;
+  }
+
+  .category-image {
+    width: 60px;
+    height: 60px;
+  }
+}
+
+@media (max-width: 480px) {
+  .category-item {
+    width: 100px; /* Smaller circles for mobile screens */
+    height: 100px;
+  }
+
+  .category-image {
+    width: 50px;
+    height: 50px;
+  }
+
+  .category-item h6 {
+    font-size: 0.9rem; /* Smaller text for mobile screens */
+  }
+}

@@ -1,0 +1,44 @@
+{
+    "navbar": {
+      "home": "मुख्यपृष्ठ",
+      "about": "आमच्याबद्दल",
+      "services": "सेवा",
+      "contact": "संपर्क",
+      "searchPlaceholder": "जमिनी शोधा...",
+      "uploadLand": "जमीन अपलोड करा",
+      "signIn": "साइन इन करा",
+      "logIn": "लॉग इन करा",
+      "language": "भाषा"
+    },
+    "landUpload": {
+      "title": "तुमची जमीन अपलोड करा",
+      "step": "स्टेप {{step}} पैकी 3",
+      "name": "जमिनीचे नाव",
+      "location": "स्थान",
+      "area": "क्षेत्रफळ (एकरमध्ये)",
+      "price": "किंमत (प्रति महिना)",
+      "description": "वर्णन",
+      "uploadImages": "प्रतिमा अपलोड करा",
+      "next": "पुढे",
+      "back": "मागे",
+      "ownership": "मालकीचा प्रकार",
+      "ownershipOptions": {
+        "freehold": "फ्रीहोल्ड",
+        "leasehold": "लीझहोल्ड",
+        "cooperative": "सहकारी संस्था",
+        "powerOfAttorney": "पॉवर ऑफ अटर्नी"
+      },
+      "utilities": "उपलब्ध सुविधा",
+      "landAccess": "जमिनीपर्यंतचा प्रवेश",
+      "soilQuality": "मातीची गुणवत्ता",
+      "boundaryWall": "जमिनीभोवती कुंपण आहे का?",
+      "boundaryWallOptions": {
+        "yes": "होय",
+        "no": "नाही"
+      },
+      "reviewTitle": "तुमचे तपशील पुनरावलोकन करा",
+      "submit": "सबमिट करा",
+      "alertMessage": "जमिनीचे तपशील यशस्वीरित्या सबमिट केले!"
+    }
+  }
+  

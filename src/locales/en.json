@@ -1,0 +1,46 @@
+{
+    "navbar": {
+      "home": "Home",
+      "about": "About",
+      "services": "Services",
+      "contact": "Contact",
+      "searchPlaceholder": "Search for Land...",
+      "uploadLand": "Upload Land",
+      "signIn": "Sign In",
+      "logIn": "Log In",
+      "language": "Language"
+    },
+    "landUpload": {
+      "title": "Upload Your Land Details",
+      "step": "Step {{step}} of 3",
+      "name": "Land Name",
+      "location": "Location",
+      "area": "Area (in acres)",
+      "price": "Price (per month)",
+      "description": "Description",
+      "uploadImages": "Upload Images",
+      "next": "Next",
+      "back": "Back",
+      "ownership": "Ownership Type",
+      "ownershipOptions": {
+        "freehold": "Freehold",
+        "leasehold": "Leasehold",
+        "cooperative": "Co-operative Society",
+        "powerOfAttorney": "Power of Attorney"
+      },
+      "utilities": "Utilities Available",
+      "landAccess": "Land Access",
+      "soilQuality": "Soil Quality",
+      "boundaryWall": "Is there a boundary wall around the property?",
+      "boundaryWallOptions": {
+        "yes": "Yes",
+        "no": "No"
+      },
+      "reviewTitle": "Review Your Details",
+      "submit": "Submit",
+      "alertMessage": "Land details submitted successfully!"
+    }
+  }
+  
+  
+  

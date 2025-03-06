@@ -1,0 +1,33 @@
+.slider-container {
+  width: 100%;
+  max-width: 100%; /* Ensure it takes full width */
+  overflow: hidden; /* Prevent overflow */
+}
+
+.slide-image-div {
+  position: relative; /* Needed for caption positioning */
+  height: 400px; /* Adjust height as needed */
+}
+
+.slide-background {
+  width: 100%;
+  height: 100%;
+  background-size: cover;
+  background-position: center;
+}
+
+.caption {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  color: white; /* Caption color */
+  background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+  padding: 10px;
+  border-radius: 5px; /* Rounded corners for caption */
+}
+
+@media (max-width: 768px) {
+  .slide-image-div {
+    height: 250px; /* Adjust height for smaller screens */
+  }
+}

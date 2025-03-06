@@ -1,0 +1,186 @@
+.land-details {
+    width: 100%;
+    background-color: #e5e0ff; 
+    padding: 30px;
+    border-radius: 12px;
+    max-width: 1200px;
+    margin: 40px auto;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+  }
+  
+  /* === TOP SECTION (PRICE, TYPE, LOCATION, STATUS, BUTTON) === */
+  .top-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #fff;
+    padding: 15px 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  .top-section .price {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #333;
+  }
+  
+  .top-section .land-type {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #555;
+  }
+  
+  .top-section .location {
+    font-size: 1rem;
+    color: #666;
+  }
+  
+  .status {
+    font-weight: bold;
+    padding: 8px 15px;
+    border-radius: 8px;
+  }
+  
+  .status.available {
+    background-color: #28a745;
+    color: white;
+  }
+  
+  .status.unavailable {
+    background-color: #dc3545;
+    color: white;
+  }
+  
+  .rent-btn {
+    padding: 12px 20px;
+    border: none;
+    border-radius: 25px;
+    background-color: #0056b3;
+    color: #fff;
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.2s ease, transform 0.2s ease;
+  }
+  
+  .rent-btn:hover {
+    background-color: #003d82;
+    transform: scale(1.05);
+  }
+  
+  /* === SECOND SECTION (IMAGE & LAND ATTRIBUTES) === */
+  .details-section {
+    display: flex;
+    gap: 20px;
+    margin-top: 20px;
+  }
+  
+  .land-details-image {
+    width: 250px;
+    height: 250px;
+    border-radius: 12px;
+    object-fit: cover;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+  }
+  
+  .attributes {
+    flex: 1;
+    background: #fff;
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  .attributes p {
+    font-size: 1rem;
+    color: #555;
+    margin-bottom: 10px;
+  }
+  
+  /* === THIRD SECTION (PROPERTY DETAILS) === */
+  .property-section {
+    margin-top: 20px;
+    background: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  .property-section h3 {
+    color: #333;
+    margin-bottom: 10px;
+  }
+  
+  .property-section p {
+    color: #666;
+    font-size: 1rem;
+  }
+  
+  /* === FOURTH SECTION (OWNER DETAILS) === */
+  .owner-section {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-top: 20px;
+    background: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  .owner-photo {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid #555;
+  }
+  
+  .owner-info {
+    flex: 1;
+  }
+  
+  .owner-info p {
+    font-size: 1rem;
+    color: #555;
+    margin-bottom: 5px;
+  }
+  
+  /* === FIFTH SECTION (REVIEWS & QUALITY RATING) === */
+  .review-section {
+    margin-top: 20px;
+    background: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  .review-card {
+    background: #f8f9fa;
+    padding: 10px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+  }
+  
+  .review-card p {
+    font-size: 0.9rem;
+    color: #444;
+  }
+  
+  @media (max-width: 768px) {
+    .top-section, .details-section, .owner-section {
+      flex-direction: column;
+      align-items: center;
+    }
+  
+    .land-image {
+      width: 100%;
+      height: auto;
+    }
+  
+    .rent-btn {
+      width: 100%;
+    }
+  }
+  

@@ -1,0 +1,48 @@
+.reviews-container {
+    margin: 20px;
+    padding: 20px;
+    background-color: #f9f9f9; /* Light background color for contrast */
+    border-radius: 8px; /* Rounded corners */
+  }
+  
+  .reviews-header {
+    text-align: center; /* Center the header */
+    margin-bottom: 20px; /* Space below header */
+    font-size: 2rem; /* Header size */
+  }
+  
+  .review-items {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); /* 3 columns for square layout */
+    gap: 20px; /* Space between cards */
+  }
+  
+  .review-card {
+    background-color: white; /* White background for each review */
+    border: 1px solid #ddd; /* Border for each review */
+    border-radius: 8px; /* Rounded corners */
+    padding: 15px; /* Padding inside the card */
+    text-align: left; /* Align text to the left */
+    transition: transform 0.2s; /* Animation effect */
+  }
+  
+  .review-card:hover {
+    transform: translateY(-2px); /* Slightly raise on hover */
+  }
+  
+  .review-header {
+    display: flex; /* Use flexbox to align items */
+    align-items: center; /* Center align vertically */
+  }
+  
+  .profile-image {
+    width: 40px; /* Set size for profile image */
+    height: 40px; /* Set size for profile image */
+    border-radius: 50%; /* Make profile image circular */
+    margin-right: 10px; /* Space to the right of the image */
+  }
+  
+  .review-comment {
+    margin-top: 10px; /* Space above the review comment */
+  }
+  
