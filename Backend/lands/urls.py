@@ -2,7 +2,7 @@ from django.urls import path
 from .views import LandUploadView,land_list_create,get_land_details,create_rent_request,manage_rent_request,get_land_requests
 from django.conf import settings
 from django.conf.urls.static import static
-from .views import get_user_lands,edit_land,delete_land
+from .views import get_user_lands,edit_land,delete_land,search_lands,suggest_lands
 
 urlpatterns = [
     path("upload-land/", LandUploadView.as_view(), name="upload_land"),
@@ -14,6 +14,8 @@ urlpatterns = [
     path("user/lands/", get_user_lands, name="user_lands"),
     path("lands/<int:land_id>/edit/", edit_land, name="edit_land"),
     path("lands/<int:land_id>/delete/", delete_land, name="delete_land"),
+    path("search/", search_lands, name="search_lands"),
+    path("suggest/", suggest_lands, name="suggest_lands"),
 
 ]
 

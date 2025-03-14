@@ -3,26 +3,63 @@ import { Link, useNavigate } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { FaUserCircle } from "react-icons/fa";
 import "./Navbar.css";
+import axios from "axios";
 
 function Navbar() {
   const [user, setUser] = useState(JSON.parse(localStorage.getItem("user")) || null);
   const role = localStorage.getItem("role");
   const token = localStorage.getItem("accessToken");
+  const navigate = useNavigate(); // ✅ Use for navigation
+
+  const [searchQuery, setSearchQuery] = useState(""); // ✅ Search state
+  const [suggestions, setSuggestions] = useState([]);
 
   useEffect(() => {
+    // ✅ Handle user state update from localStorage
     const handleStorageChange = () => {
-      setUser(JSON.parse(localStorage.getItem("user"))); // Update user state
+        setUser(JSON.parse(localStorage.getItem("user"))); 
     };
+    
     window.addEventListener("storage", handleStorageChange);
+
+    // ✅ Fetch suggestions when searchQuery changes
+    if (searchQuery.trim().length > 1) {
+        fetchSuggestions();
+    } else {
+        setSuggestions([]);
+    }
+
     return () => {
-      window.removeEventListener("storage", handleStorageChange);
+        window.removeEventListener("storage", handleStorageChange);
     };
-  }, []);
+}, [searchQuery]); // ✅ Now also listens to searchQuery changes
+
+const fetchSuggestions = async () => {
+  try {
+    const response = await axios.get(`http://127.0.0.1:8000/landapi/suggest/?q=${searchQuery}`);
+    setSuggestions(response.data);
+  } catch (error) {
+    console.error("Error fetching suggestions:", error);
+  }
+};
+
+const handleSuggestionClick = (suggestion) => {
+  setSearchQuery(suggestion); // ✅ Fill input with clicked suggestion
+  setSuggestions([]); // ✅ Hide suggestions
+  navigate(`/search?q=${suggestion}`);
+};
 
   const handleLogout = () => {
       localStorage.clear(); // Removes all stored data
       window.location.reload(); // Refresh the page to update UI
       setUser(null);
+    };
+
+    const handleSearchSubmit = (e) => {
+      e.preventDefault();
+      if (searchQuery.trim()) {
+        navigate(`/search?q=${searchQuery}`); // ✅ Redirect to search results page
+      }
     };
   
   
@@ -54,10 +91,35 @@ function Navbar() {
             <li className="nav-item"><a className="nav-link" href="#contact">Contact</a></li>
           </ul>
 
-          <form className="d-flex me-3">
-            <input className="form-control search-input" type="search" placeholder="Search" />
-            <button className="btn btn-primary search-btn" type="submit">🔍</button>
-          </form>
+
+          <div className="search-container position-relative">
+            <form className="d-flex me-3" onSubmit={handleSearchSubmit}>
+              <input
+                className="form-control search-input"
+                type="search"
+                placeholder="Search lands..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+              <button className="btn btn-primary search-btn" type="submit">🔍</button>
+            </form>
+
+            {/* ✅ Search Suggestions Dropdown */}
+            {suggestions.length > 0 && (
+              <ul className="list-group position-absolute w-100" style={{ zIndex: 1000, top: "100%" }}>
+                {suggestions.map((suggestion, index) => (
+                  <li 
+                    key={index} 
+                    className="list-group-item list-group-item-action"
+                    onClick={() => handleSuggestionClick(suggestion)}
+                    style={{ cursor: "pointer" }}
+                  >
+                    {suggestion}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
 
           <ul className="navbar-nav">
             {token ? (

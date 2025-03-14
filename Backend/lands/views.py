@@ -38,7 +38,7 @@ def land_list_create(request):
     return Response(serializer.data, status=status.HTTP_200_OK)
 
 @api_view(["GET"])
-@permission_classes([AllowAny])  # Allow non-authenticated users
+@permission_classes([AllowAny])  
 def get_land_details(request, id):
     land = get_object_or_404(Land, land_id=id)
     serializer = LandSerializer(land)
@@ -90,6 +90,48 @@ def edit_land(request, land_id):
         )
     except Exception as e:
         return Response({"error": "An error occurred", "details": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+#searching view
+@api_view(["GET"])
+@permission_classes([AllowAny])
+def search_lands(request):
+    """ ✅ Search lands by location, state, district, or land type """
+    query = request.GET.get("q", "").strip()  # Get search query
+
+    if not query:
+        return Response({"error": "Search query is required."}, status=status.HTTP_400_BAD_REQUEST)
+
+    # ✅ Filter lands based on the search query
+    lands = Land.objects.filter(
+        location__icontains=query) | Land.objects.filter(
+        state__icontains=query) | Land.objects.filter(
+        district__icontains=query) | Land.objects.filter(
+        land_type__icontains=query)
+
+    serializer = LandSerializer(lands, many=True)
+    
+    return Response(serializer.data, status=status.HTTP_200_OK)
+
+#suggestion in search
+@api_view(["GET"])
+@permission_classes([AllowAny])  # ✅ Allow unauthenticated users
+def suggest_lands(request):
+    """ ✅ Suggest lands as users type in the search bar """
+    query = request.GET.get("q", "").strip()
+
+    if not query:
+        return Response([], status=status.HTTP_200_OK)
+
+    # ✅ Get distinct values for location, state, district, or land_type
+    location_suggestions = Land.objects.filter(location__icontains=query).values_list("location", flat=True).distinct()
+    state_suggestions = Land.objects.filter(state__icontains=query).values_list("state", flat=True).distinct()
+    district_suggestions = Land.objects.filter(district__icontains=query).values_list("district", flat=True).distinct()
+    type_suggestions = Land.objects.filter(land_type__icontains=query).values_list("land_type", flat=True).distinct()
+
+    # ✅ Combine all suggestions into one list (remove duplicates)
+    suggestions = list(set(location_suggestions) | set(state_suggestions) | set(district_suggestions) | set(type_suggestions))
+
+    return Response(suggestions, status=status.HTTP_200_OK)
 
 
 @api_view(["POST"])
@@ -157,3 +199,4 @@ def get_land_requests(request):
     rent_requests = RentRequest.objects.filter(land__owner=request.user)
     serializer = RentRequestSerializer(rent_requests, many=True)
     return Response(serializer.data)
+

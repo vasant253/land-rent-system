@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { Link } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./LandList.css";
 import { getAccessToken } from "../../auth";
+import LandCard from "./LandCard";
 
 const AllLands = () => {
   const [lands, setLands] = useState([]);
@@ -36,29 +36,6 @@ const AllLands = () => {
         ) : (
           <p className="text-center">No lands available</p>
         )}
-      </div>
-    </div>
-  );
-};
-
-const LandCard = ({ land }) => {
-  return (
-    <div className="col-md-4 mb-4">
-      <div className="card land-card">
-        <img
-          src={land.images.length > 0 ? `http://127.0.0.1:8000${land.images[0].image}` : "/default-land.jpg"}
-          alt={land.name}
-          className="card-img-top land-image"
-        />
-        <div className="card-body">
-          <h3 className="card-title">{land.land_type || "Untitled Land"}</h3>
-          <p className="card-text">Location: {land.location}</p>
-          <p className="card-text">Price: ₹{land.price}</p>
-          <p className="card-text">Area: {land.area} sq. ft</p>
-          <Link to={`/land/${land.land_id}`}>
-            <button className="btn btn-info view-details-btn">View Details</button>
-          </Link>
-        </div>
       </div>
     </div>
   );

@@ -16,6 +16,7 @@ import UserDashboard from './Pages/User/UserDashboard';
 import PrivateRoute from './Components/PrivateRoutes';
 import ManageUsers from './Components/AdminManage/ManageUsers';
 import AllLands from './Components/LandList/AllLands';
+import SearchResults from './Components/LandList/SearchResults';
 
 
 
@@ -53,6 +54,7 @@ function App() {
             <Route path='/about' element={<AboutUs/>} />
             <Route path='/landUpload' element={<LandUpload/>} />
             <Route path='/login' element={<Login/>} />
+            <Route path="/search" element={<SearchResults />} />
             <Route path="/admin" element={<PrivateRoute element={<AdminDashboard />} allowedRole="admin" />} />
             <Route path="/profile" element={<ProfileDashboard />} />
             <Route path="/dashboard" element={<PrivateRoute element={<UserDashboard />} allowedRole="user" />} /> 
@@ -61,7 +63,9 @@ function App() {
             <Route path="/all-lands" element={<AllLands />} />
             <Route path="/land/:id" element={<LandDetails />} />
           </Routes>
+          <div className="mt-4">
           <Footer/>
+          </div>
         </div>
       </Router>
   );
