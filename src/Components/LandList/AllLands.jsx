@@ -51,7 +51,7 @@ const LandCard = ({ land }) => {
           className="card-img-top land-image"
         />
         <div className="card-body">
-          <h3 className="card-title">{land.name || "Untitled Land"}</h3>
+          <h3 className="card-title">{land.land_type || "Untitled Land"}</h3>
           <p className="card-text">Location: {land.location}</p>
           <p className="card-text">Price: ₹{land.price}</p>
           <p className="card-text">Area: {land.area} sq. ft</p>

@@ -14,7 +14,7 @@ urlpatterns = [
     path("protected-route/", ProtectedView.as_view(), name="protected-route"),
     path('usersList/', UserListView.as_view(), name='user-list'),
     path('usersList/<int:pk>/', UserDetailView.as_view(), name='user-detail'),
-    path("user/update/", update_profile, name="update_profile")
+    path("user/update/", update_profile, name="update_profile"),
 ]
 
 

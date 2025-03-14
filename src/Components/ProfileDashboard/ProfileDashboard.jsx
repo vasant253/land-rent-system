@@ -137,16 +137,40 @@ const handleEditSubmit = async () => {
     }
 };
 
+const handleEditProfile = () => {
+    setProfileData({
+        full_name: user.full_name || "",
+        email: user.email || "",
+        phone: user.phone || "",
+        profile_photo: null  // Keep photo optional
+    });
+    setShowProfileEditModal(true);
+};
+
+
 const handleProfileUpdate = async () => {
     try {
         const token = await getAccessToken();
-
         const formData = new FormData();
-        formData.append("full_name", profileData.full_name);
-        formData.append("email", profileData.email);
-        formData.append("phone", profileData.phone);
+
+        // ✅ Send only fields that have changed
+        if (profileData.full_name !== user.full_name) {
+            formData.append("full_name", profileData.full_name);
+        }
+        if (profileData.email !== user.email) {
+            formData.append("email", profileData.email);
+        }
+        if (profileData.phone !== user.phone) {
+            formData.append("phone", profileData.phone);
+        }
         if (profileData.profile_photo) {
             formData.append("profile_photo", profileData.profile_photo);
+        }
+
+        // ✅ Check if any field is actually changed
+        if (!formData.has("full_name") && !formData.has("email") && !formData.has("phone") && !formData.has("profile_photo")) {
+            alert("No changes detected.");
+            return;
         }
 
         await axios.put(
@@ -163,6 +187,7 @@ const handleProfileUpdate = async () => {
         alert("Failed to update profile.");
     }
 };
+
 
 
     return (
@@ -187,7 +212,7 @@ const handleProfileUpdate = async () => {
                                 <Card.Text><strong>Full Name:</strong> {user.full_name || "N/A"}</Card.Text>
                                 <Card.Text><strong>Email:</strong> {user.email}</Card.Text>
                                 <Card.Text><strong>Phone:</strong> {user.phone || "N/A"}</Card.Text>
-                                <Button variant="primary" onClick={() => setShowProfileEditModal(true)}>Edit</Button>
+                                <Button variant="primary" onClick={() => handleEditProfile()}>Edit</Button>
                             </Col>
                         </Row>
                     </Card.Body>

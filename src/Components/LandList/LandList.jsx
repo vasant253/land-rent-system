@@ -31,20 +31,21 @@ const LandList = () => {
 
   return (
     <div className="container">
-      <h2 className="text-center my-4 list-header">Land Listings</h2>
-      <div className="row">
+    <h2 className="text-center my-4 list-header">Land Listings</h2>
+    <div className="row">
         {lands.length > 0 ? (
-          lands.map((land) => <LandCard key={land.land_id} land={land} />)
+            lands.slice(0, 3).map((land) => <LandCard key={land.land_id} land={land} />)  // ✅ Show only 3 recent lands
         ) : (
-          <p className="text-center">No lands available</p>
+            <p className="text-center">No lands available</p>
         )}
-      </div>
-      <div className="text-center mt-4">
-        <Link to="/all-lands">
-        <button className="btn btn-primary show-more-btn">Show More Lands</button>
-        </Link>
-      </div>
     </div>
+    <div className="text-center mt-4">
+        <Link to="/all-lands">
+            <button className="btn btn-primary show-more-btn">Show More Lands</button>
+        </Link>
+    </div>
+</div>
+
   );
 };
 
@@ -58,7 +59,8 @@ const LandCard = ({ land }) => {
           className="card-img-top land-image"
         />
         <div className="card-body">
-          <h3 className="card-title">{land.name}</h3>
+          <h3 className="card-title">{land.land_type}</h3>
+          <p className="card-text">Status: {land.land_status}</p>
           <p className="card-text">Location: {land.location}</p>
           <p className="card-text">Price: ₹{land.price}</p>
           <p className="card-text">Area: {land.area} sq. ft</p>
