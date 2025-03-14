@@ -13,6 +13,10 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework import generics, status, permissions
 from rest_framework.decorators import api_view, permission_classes
+import random
+from django.core.cache import cache
+from django.core.mail import send_mail
+from django.conf import settings
 
 User = get_user_model()
 
@@ -136,3 +140,49 @@ def update_profile(request):
         {"error": "Invalid data", "details": serializer.errors},
         status=status.HTTP_400_BAD_REQUEST
     )
+
+#otp verification
+def generate_otp():
+    return str(random.randint(100000, 999999))
+
+@api_view(["POST"])
+@permission_classes([AllowAny])
+def send_otp(request):
+    """ ✅ Generate & Send OTP to Email """
+    email = request.data.get("email")
+
+    if not email:
+        return Response({"error": "Email is required"}, status=400)
+
+    otp = generate_otp()
+
+    # ✅ Store OTP temporarily (5 min expiry)
+    cache.set(f"otp_{email}", otp, timeout=300)
+
+    # ✅ Send OTP via Email
+    send_mail(
+        "Your OTP Code",
+        f"Your OTP is {otp}. It will expire in 5 minutes.",
+        settings.EMAIL_HOST_USER,
+        [email],
+        fail_silently=False,
+    )
+
+    return Response({"message": "OTP sent to email"}, status=200)
+
+@api_view(["POST"])
+@permission_classes([AllowAny])
+def verify_otp(request):
+    """ ✅ Verify OTP & Complete Registration """
+    email = request.data.get("email")
+    entered_otp = request.data.get("otp")
+
+    stored_otp = cache.get(f"otp_{email}")
+
+    if not stored_otp:
+        return Response({"error": "OTP expired or not found"}, status=400)
+
+    if entered_otp == stored_otp:
+        return Response({"message": "OTP verified!"}, status=200)
+
+    return Response({"error": "Invalid OTP"}, status=400)

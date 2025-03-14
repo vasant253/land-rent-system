@@ -17,6 +17,7 @@ import PrivateRoute from './Components/PrivateRoutes';
 import ManageUsers from './Components/AdminManage/ManageUsers';
 import AllLands from './Components/LandList/AllLands';
 import SearchResults from './Components/LandList/SearchResults';
+import FilteredLands from './Components/LandList/FilteredLands';
 
 
 
@@ -46,14 +47,16 @@ function App() {
 
   return (
       <Router>
-        <div className="App">
+        <div className="App wrapper">
           <Navbar/>
+          <div className='content'>
           <Routes>
             <Route path="*" element={<AuthRedirector />} />
             <Route path='/' element={<Home/>} />
             <Route path='/about' element={<AboutUs/>} />
             <Route path='/landUpload' element={<LandUpload/>} />
             <Route path='/login' element={<Login/>} />
+            <Route path="/lands/:category" element={<FilteredLands />} />
             <Route path="/search" element={<SearchResults />} />
             <Route path="/admin" element={<PrivateRoute element={<AdminDashboard />} allowedRole="admin" />} />
             <Route path="/profile" element={<ProfileDashboard />} />
@@ -63,6 +66,7 @@ function App() {
             <Route path="/all-lands" element={<AllLands />} />
             <Route path="/land/:id" element={<LandDetails />} />
           </Routes>
+          </div>
           <div className="mt-4">
           <Footer/>
           </div>

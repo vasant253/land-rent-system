@@ -10,3 +10,13 @@ body {
   flex-direction: column;
   min-height: 100vh;
 }
+
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh; /* ✅ Makes sure the page is at least full height */
+}
+
+.content {
+  flex: 1; /* ✅ Pushes the footer down when content is small */
+}

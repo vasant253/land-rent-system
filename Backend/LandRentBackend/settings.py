@@ -175,3 +175,13 @@ SIMPLE_JWT = {
     "BLACKLIST_AFTER_ROTATION": True,
     "AUTH_HEADER_TYPES": ("Bearer",),
 }
+
+#email otp sending
+
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = "smtp.gmail.com"
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = "vasantgawade253@gmail.com"  # 🔴 Replace with your email
+EMAIL_HOST_PASSWORD = "unbo ejic lqwd qmhw"  # 🔴 Use App Password (if using Gmail)
+
