@@ -1,8 +1,7 @@
 import React, { useEffect } from 'react';
 import './App.css';
+import { useNavigate, useLocation } from "react-router-dom";
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { I18nextProvider, useTranslation } from "react-i18next";
-import i18n from './i18n';  // Import i18n setup
 import Navbar from './Components/NavBar/Navbar';
 import Footer from './Components/Footer/Footer';
 import AboutUs from './Components/AbouUs/AboutUs';
@@ -12,35 +11,59 @@ import Login from './Components/Login & Register/Login';
 import LandDetails from './Components/LandDetails/LandDetails';
 import LandUpload from './Components/LandUpload/LandUpload';
 import ProfileDashboard from './Components/ProfileDashboard/ProfileDashboard';
+import AdminDashboard from './Pages/Admin/AdminDashboard';
+import UserDashboard from './Pages/User/UserDashboard';
+import PrivateRoute from './Components/PrivateRoutes';
+import ManageUsers from './Components/AdminManage/ManageUsers';
+import AllLands from './Components/LandList/AllLands';
+
 
 
 function App() {
-  const { i18n } = useTranslation();
 
-  // Load language preference from localStorage on startup
-  useEffect(() => {
-    const savedLang = localStorage.getItem("language") || "en";
-    i18n.changeLanguage(savedLang);
-  }, [i18n]);
+  const AuthRedirector = () => {
+    const navigate = useNavigate();
+    const location = useLocation();
+    const user = JSON.parse(localStorage.getItem("user"));
+    const role = localStorage.getItem("role");
+  
+    useEffect(() => {
+      if (!user && location.pathname === "/") {
+        navigate("/");
+      } else if (user) {
+        if (role === "admin" && location.pathname === "/") {
+          navigate("/admin");
+        } else if (role === "user" && location.pathname === "/") {
+          navigate("/dashboard");
+        }
+      }
+    }, [location.pathname, navigate]);
+  
+    return null; // No UI, only handles redirection
+  };
+
 
   return (
-    <I18nextProvider i18n={i18n}>
       <Router>
         <div className="App">
           <Navbar/>
           <Routes>
+            <Route path="*" element={<AuthRedirector />} />
             <Route path='/' element={<Home/>} />
             <Route path='/about' element={<AboutUs/>} />
             <Route path='/landUpload' element={<LandUpload/>} />
             <Route path='/login' element={<Login/>} />
+            <Route path="/admin" element={<PrivateRoute element={<AdminDashboard />} allowedRole="admin" />} />
             <Route path="/profile" element={<ProfileDashboard />} />
+            <Route path="/dashboard" element={<PrivateRoute element={<UserDashboard />} allowedRole="user" />} /> 
+            <Route path="/usersList" element={<PrivateRoute element={<ManageUsers />} allowedRole="admin" /> } />
             <Route path='/register' element={<Register/>} />
+            <Route path="/all-lands" element={<AllLands />} />
             <Route path="/land/:id" element={<LandDetails />} />
           </Routes>
           <Footer/>
         </div>
       </Router>
-    </I18nextProvider>
   );
 }
 

@@ -1,16 +1,18 @@
 from django.contrib import admin
 from .models import Land, LandImage
 
-class LandImageInline(admin.TabularInline):  
+class LandImageInline(admin.TabularInline):  # Allows multiple images to be added inline
     model = LandImage
-    extra = 1  # Allows adding multiple images directly in the admin panel
+    extra = 1  # Allows at least one image to be uploaded
 
+@admin.register(Land)
 class LandAdmin(admin.ModelAdmin):
-    list_display = ('name', 'landType', 'created_at')  # Show these fields in the admin list
-    search_fields = ('name', 'landType')  # Enable search functionality
-    list_filter = ('landType', 'created_at')  # Add filters for land type and creation date
-    inlines = [LandImageInline]  # Allow uploading multiple images directly from the admin panel
+    list_display = ("land_id", "owner", "location", "state", "district", "price", "land_status", "created_at")
+    list_filter = ("state", "land_status", "land_type")
+    search_fields = ("location", "owner__username", "state", "district", "land_type")
+    ordering = ("-created_at",)
+    inlines = [LandImageInline]  # Adds images inline in the admin panel
 
-# Register models
-admin.site.register(Land, LandAdmin)
-admin.site.register(LandImage)
+@admin.register(LandImage)
+class LandImageAdmin(admin.ModelAdmin):
+    list_display = ("id", "land", "image")

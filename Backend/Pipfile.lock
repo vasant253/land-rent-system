@@ -33,12 +33,12 @@
         },
         "django": {
             "hashes": [
-                "sha256:55c764c5990759ee97ba60ac1ce17092e91e445be1d0a83e88b754835c4bb564",
-                "sha256:ec33b0b3846d145a95d84a1ffea29f64ce4fc73ba755d9a6ab35128f354b750a"
+                "sha256:1323617cb624add820cb9611cdcc788312d250824f92ca6048fda8625514af2b",
+                "sha256:30de4ee43a98e5d3da36a9002f287ff400b43ca51791920bfb35f6917bfe041c"
             ],
             "index": "pypi",
             "markers": "python_version >= '3.10'",
-            "version": "==5.2b1"
+            "version": "==5.1.7"
         },
         "django-cors-headers": {
             "hashes": [

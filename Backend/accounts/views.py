@@ -1,86 +1,111 @@
-from django.contrib.auth import login, logout
-from django.contrib.auth import get_user_model
-from rest_framework.views import APIView
-from rest_framework.response import Response
 from rest_framework import status
-from .serializers import RegisterSerializer, LoginSerializer, UserSerializer
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from rest_framework.permissions import AllowAny
+from django.contrib.auth import get_user_model
+from django.contrib.auth.hashers import check_password
+from rest_framework_simplejwt.tokens import RefreshToken
+from .serializers import UserSerializer
+from rest_framework_simplejwt.authentication import JWTAuthentication
 from django.contrib.auth import authenticate
-from django.contrib.auth.models import User
-from rest_framework.authtoken.models import Token
-from rest_framework.decorators import api_view, permission_classes
+from django.core.exceptions import ObjectDoesNotExist
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework import generics, status, permissions
+from rest_framework.decorators import api_view, permission_classes
 
 User = get_user_model()
 
-# @api_view(['GET'])
-# @permission_classes([IsAuthenticated])
-# def get_user_details(request):
-#     auth_header = request.headers.get('Authorization')
-#     print("Received Authorization Header:", auth_header)  # Debugging log
-
-#     if not auth_header or not auth_header.startswith("Token "):
-#         return Response({"detail": "Invalid or missing token"}, status=401)
-
-#     return Response({
-#         "id": request.user.id,
-#         "username": request.user.username,
-#         "email": request.user.email
-#     })
-
-
-from rest_framework.decorators import api_view, authentication_classes, permission_classes
-from rest_framework.response import Response
-from rest_framework.authentication import TokenAuthentication
-from rest_framework.permissions import IsAuthenticated
-
-from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.response import Response
-
-@api_view(['GET'])
-@permission_classes([IsAuthenticated])
-def get_user_details(request):
-    auth_header = request.headers.get('Authorization')
-    print("Received Authorization Header:", auth_header)  # Debugging log
-
-    if not auth_header or not auth_header.startswith("Token "):
-        return Response({"detail": "Invalid or missing token"}, status=401)
-
-    return Response({
-        "id": request.user.id,
-        "username": request.user.username,
-        "email": request.user.email
-    })
-
-
-class RegisterUser(APIView):
-    def post(self, request):
-        serializer = RegisterSerializer(data=request.data)
-        if serializer.is_valid():
-            user = serializer.save()
-            return Response({'message': 'Registration successful!'}, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-@api_view(["POST"])
-def login_view(request):
-    email = request.data.get("email")
-    password = request.data.get("password")
-
-    user = authenticate(username=email, password=password)
-    if user:
-        token, created = Token.objects.get_or_create(user=user)
-        login(request, user)  # Start session
-        return Response({"token": token.key, "user": {"username": user.username, "email": user.email}}, status=200)
-    return Response({"error": "Invalid credentials"}, status=400)
-
-@api_view(["POST"])
-@permission_classes([IsAuthenticated])
-def logout_view(request):
-    request.auth.delete()  # Delete token
-    logout(request)
-    return Response({"message": "Logged out successfully"}, status=200)
-
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
-def check_authentication(request):
-    return Response({"isAuthenticated": True, "user": {"username": request.user.username, "email": request.user.email}})
+def get_user_details(request):
+    user = request.user
+    return Response({
+        "id": user.id,
+        "username": user.username,
+        "email": user.email,
+        "phone":user.phone,
+        "full_name":user.full_name,
+        "profile_photo": request.build_absolute_uri(user.profile_photo.url) if user.profile_photo else None,
+    })
+
+# User Registration View
+class RegisterUserView(APIView):
+    permission_classes = [AllowAny]
+    parser_classes = [MultiPartParser, FormParser]
+
+    def post(self, request):
+        serializer = UserSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({'message': 'User registered successfully!'}, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+# Real-time Validation View
+class CheckUserView(APIView):
+    permission_classes = [AllowAny]
+
+    def get(self, request):
+        username = request.query_params.get('username')
+        email = request.query_params.get('email')
+        phone = request.query_params.get('phone')
+
+        if username and User.objects.filter(username=username).exists():
+            return Response({'error': 'Username already taken!'}, status=status.HTTP_400_BAD_REQUEST)
+        if email and User.objects.filter(email=email).exists():
+            return Response({'error': 'Email already registered!'}, status=status.HTTP_400_BAD_REQUEST)
+        if phone and User.objects.filter(phone=phone).exists():
+            return Response({'error': 'Phone number already in use!'}, status=status.HTTP_400_BAD_REQUEST)
+
+        return Response({'message': 'Available'}, status=status.HTTP_200_OK)
+
+class UserLoginView(APIView):
+    permission_classes = [AllowAny]  # ✅ Allow login without authentication
+
+    def post(self, request):
+        identifier = request.data.get("identifier")  # Can be email or username
+        password = request.data.get("password")
+
+        if not identifier or not password:
+            return Response({"error": "Username/Email and password are required"}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Try to identify if the input is an email or username
+        user = None
+        if "@" in identifier:  # ✅ Check if it's an email
+            try:
+                user = User.objects.get(email=identifier)  
+            except ObjectDoesNotExist:
+                return Response({"error": "Invalid email or password"}, status=status.HTTP_401_UNAUTHORIZED)
+        else:  # ✅ If not an email, assume it's a username
+            user = authenticate(username=identifier, password=password)
+
+        # Authenticate user
+        if user and check_password(password, user.password):
+            refresh = RefreshToken.for_user(user)
+            return Response({
+                "refresh": str(refresh),
+                "access": str(refresh.access_token),
+                "role": user.role,
+                "message": "Login successful"
+            })
+        else:
+            return Response({"error": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED)
+
+class ProtectedView(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        return Response({"message": "You have accessed a protected route!"}, status=200)
+
+from .permissions import IsCustomAdmin  # Import the custom permission
+
+class UserListView(generics.ListCreateAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    permission_classes = [IsCustomAdmin]  # Use custom permission
+
+class UserDetailView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    permission_classes = [IsCustomAdmin]  # Use custom permission
