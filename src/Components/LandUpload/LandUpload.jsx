@@ -6,7 +6,6 @@ import { getAccessToken } from "../../auth";
 
 const LandUpload = () => {
   const [formData, setFormData] = useState({
-    name: "",
     location: "",
     state: "",
     district: "",
@@ -113,10 +112,7 @@ useEffect(() => {
       <form onSubmit={handleSubmit} encType="multipart/form-data">
         <div className="row">
           {/* Row 1 */}
-          <div className="col-md-6 mb-3">
-            <label className="form-label">Land Name: *</label>
-            <input type="text" className="form-control" name="name" value={formData.name} onChange={handleChange} required />
-          </div>
+  
           <div className="col-md-6 mb-3">
             <label className="form-label">Location: *</label>
             <input type="text" className="form-control" name="location" value={formData.location} onChange={handleChange} required />
@@ -138,9 +134,20 @@ useEffect(() => {
             <input type="number" className="form-control" name="area" value={formData.area} onChange={handleChange} required />
           </div>
           <div className="col-md-6 mb-3">
-            <label className="form-label">Land Type: *</label>
-            <input type="text" className="form-control" name="land_type" value={formData.land_type} onChange={handleChange} required />
-          </div>
+  <label className="form-label">Land Type: *</label>
+  <select
+    className="form-control"
+    name="land_type"
+    value={formData.land_type}
+    onChange={handleChange}
+    required
+  >
+    <option value="" disabled>Select Land Type</option>
+    <option value="Agricultural">Agricultural</option>
+    <option value="Commercial">Commercial</option>
+    <option value="Residential">Residential</option>
+  </select>
+</div>    
 
           {/* Row 4 */}
           <div className="col-md-6 mb-3">

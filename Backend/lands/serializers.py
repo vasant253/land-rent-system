@@ -17,7 +17,7 @@ class LandSerializer(serializers.ModelSerializer):
     uploaded_images = serializers.ListField(
         child=serializers.ImageField(), write_only=True, required=False
     )
-    owner = OwnerSerializer()
+    owner = OwnerSerializer(read_only=True)
 
     class Meta:
         model = Land
