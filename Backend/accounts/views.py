@@ -42,22 +42,29 @@ class RegisterUserView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 # Real-time Validation View
-class CheckUserView(APIView):
-    permission_classes = [AllowAny]
+@api_view(["GET"])
+@permission_classes([AllowAny])  # ✅ Allow unauthenticated users
+def check_availability(request):
+    """ ✅ Check if username, email, or phone is already taken """
+    username = request.GET.get("username")
+    email = request.GET.get("email")
+    phone = request.GET.get("phone")
 
-    def get(self, request):
-        username = request.query_params.get('username')
-        email = request.query_params.get('email')
-        phone = request.query_params.get('phone')
+    response_data = {}
 
-        if username and User.objects.filter(username=username).exists():
-            return Response({'error': 'Username already taken!'}, status=status.HTTP_400_BAD_REQUEST)
-        if email and User.objects.filter(email=email).exists():
-            return Response({'error': 'Email already registered!'}, status=status.HTTP_400_BAD_REQUEST)
-        if phone and User.objects.filter(phone=phone).exists():
-            return Response({'error': 'Phone number already in use!'}, status=status.HTTP_400_BAD_REQUEST)
+    if username and User.objects.filter(username=username).exists():
+        response_data["username"] = "Username is already taken."
 
-        return Response({'message': 'Available'}, status=status.HTTP_200_OK)
+    if email and User.objects.filter(email=email).exists():
+        response_data["email"] = "Email is already registered."
+
+    if phone and User.objects.filter(phone=phone).exists():
+        response_data["phone"] = "Phone number is already in use."
+
+    if not response_data:
+        return Response({"message": "Available"}, status=status.HTTP_200_OK)
+    
+    return Response(response_data, status=status.HTTP_400_BAD_REQUEST)
 
 class UserLoginView(APIView):
     permission_classes = [AllowAny]  # ✅ Allow login without authentication

@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
+import axios from "axios";
 
 const UserRegistration = () => {
   const [formData, setFormData] = useState({
@@ -12,40 +13,40 @@ const UserRegistration = () => {
   });
 
   // State for validation errors
-  const [usernameError, setUsernameError] = useState("");
-  const [emailError, setEmailError] = useState("");
-  const [phoneError, setPhoneError] = useState("");
   const [message, setMessage] = useState(null);
   const [error, setError] = useState(null);
+  const [passwordStrength, setPasswordStrength] = useState("");
+
+  const [errors, setErrors] = useState({});
 
   const handleChange = async (e) => {
     const { name, value } = e.target;
-
-    if (name === "profile_photo") {
-      setFormData({ ...formData, profile_photo: e.target.files[0] });
-      return;
-    }
-
     setFormData({ ...formData, [name]: value });
 
-    // **Real-time validation for username, email, and phone**
-    if (name === "username" || name === "email" || name === "phone") {
-      try {
-        const response = await fetch(`http://127.0.0.1:8000/api/check-user/?${name}=${value}`);
-        const data = await response.json();
+    if (name === "password") {
+      checkPasswordStrength(value);
+    }
 
-        if (!response.ok) {
-          if (name === "username") setUsernameError(data.error || "Username already taken!");
-          if (name === "email") setEmailError(data.error || "Email already registered!");
-          if (name === "phone") setPhoneError(data.error || "Phone number already in use!");
-        } else {
-          if (name === "username") setUsernameError("");
-          if (name === "email") setEmailError("");
-          if (name === "phone") setPhoneError("");
+    if (["username", "email", "phone"].includes(name)) {
+        try {
+            const response = await axios.get(`http://127.0.0.1:8000/api/check-availability/?${name}=${value}`);
+            setErrors((prevErrors) => ({ ...prevErrors, [name]: "" })); // ✅ Clear error if available
+        } catch (error) {
+            if (error.response?.data[name]) {
+                setErrors((prevErrors) => ({ ...prevErrors, [name]: error.response.data[name] })); // ✅ Show error if taken
+            }
         }
-      } catch (err) {
-        console.error("Validation error:", err);
-      }
+    }
+};
+
+
+  const checkPasswordStrength = (password) => {
+    if (password.length < 8) {
+      setPasswordStrength("Weak (At least 8 characters required)");
+    } else if (!/\d/.test(password) || !/[A-Za-z]/.test(password)) {
+      setPasswordStrength("Medium (Use letters & numbers)");
+    } else {
+      setPasswordStrength("Strong ✅");
     }
   };
 
@@ -56,27 +57,27 @@ const UserRegistration = () => {
 
     const formDataToSend = new FormData();
     Object.entries(formData).forEach(([key, value]) => {
-      if (value) formDataToSend.append(key, value);
+        if (value) formDataToSend.append(key, value);
     });
 
     try {
-      const response = await fetch("http://127.0.0.1:8000/api/register/", {
-        method: "POST",
-        body: formDataToSend,
-      });
+        const response = await axios.post(
+            "http://127.0.0.1:8000/api/register/",
+            formDataToSend, 
+            { headers: { "Content-Type": "multipart/form-data" } }
+        );
 
-      const data = await response.json();
-
-      if (response.ok) {
-        setMessage("Registration Successful! ✅");
-        setFormData({ username: "", full_name: "", email: "", phone: "", password: "", profile_photo: null });
-      } else {
-        setError(data.message || "Registration failed.");
-      }
+        if (response.status === 201) {
+            setMessage("Registration Successful! ✅");
+            setFormData({ username: "", full_name: "", email: "", phone: "", password: "", profile_photo: null });
+        } else {
+            setError(response.data.message || "Registration failed.");
+        }
     } catch (error) {
-      setError("Something went wrong! Please try again.");
+        setError(error.response?.data?.message || "Something went wrong! Please try again.");
     }
-  };
+};
+
 
   return (
     <div className="container d-flex justify-content-center align-items-center vh-100">
@@ -87,28 +88,35 @@ const UserRegistration = () => {
         {error && <div className="alert alert-danger">{error}</div>}
 
         <form onSubmit={handleSubmit} encType="multipart/form-data">
+          {/* Username */}
           <div className="mb-3">
-            <label className="form-label fw-semibold">Username</label>
-            <input type="text" name="username" className="form-control" value={formData.username} onChange={handleChange} required />
-            {usernameError && <div className="text-danger">{usernameError}</div>}
+              <label className="form-label fw-semibold">Username</label>
+              <input type="text" name="username" className="form-control" value={formData.username} onChange={handleChange} required />
+              {errors.username && <div className="text-danger">{errors.username}</div>}
           </div>
+
           <div className="mb-3">
             <label className="form-label fw-semibold">Full Name</label>
             <input type="text" name="full_name" className="form-control" value={formData.full_name} onChange={handleChange} required />
           </div>
+          {/* Email */}
           <div className="mb-3">
-            <label className="form-label fw-semibold">Email</label>
-            <input type="email" name="email" className="form-control" value={formData.email} onChange={handleChange} required />
-            {emailError && <div className="text-danger">{emailError}</div>}
+              <label className="form-label fw-semibold">Email</label>
+              <input type="email" name="email" className="form-control" value={formData.email} onChange={handleChange} required />
+              {errors.email && <div className="text-danger">{errors.email}</div>}
           </div>
+          {/* Phone */}
           <div className="mb-3">
-            <label className="form-label fw-semibold">Phone Number</label>
-            <input type="tel" name="phone" className="form-control" value={formData.phone} onChange={handleChange} required />
-            {phoneError && <div className="text-danger">{phoneError}</div>}
+              <label className="form-label fw-semibold">Phone Number</label>
+              <input type="tel" name="phone" className="form-control" value={formData.phone} onChange={handleChange} required />
+              {errors.phone && <div className="text-danger">{errors.phone}</div>}
           </div>
           <div className="mb-3">
             <label className="form-label fw-semibold">Password</label>
             <input type="password" name="password" className="form-control" value={formData.password} onChange={handleChange} required />
+            <div className={`text-${passwordStrength.includes("Weak") ? "danger" : passwordStrength.includes("Medium") ? "warning" : "success"}`}>
+              {passwordStrength}
+            </div>
           </div>
           <div className="mb-3">
             <label className="form-label fw-semibold">Profile Photo</label>
