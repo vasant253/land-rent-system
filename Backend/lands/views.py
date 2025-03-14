@@ -56,24 +56,40 @@ def get_user_lands(request):
 @permission_classes([IsAuthenticated])
 def delete_land(request, land_id):
     try:
-        land = Land.objects.get(id=land_id, owner=request.user)
+        # ✅ Ensure the land exists and belongs to the authenticated user
+        land = get_object_or_404(Land, land_id=land_id, owner=request.user)
+        
         land.delete()
-        return Response({"message": "Land deleted successfully"}, status=200)
+        return Response({"message": "Land deleted successfully"}, status=status.HTTP_200_OK)
+
     except Land.DoesNotExist:
-        return Response({"message": "Land not found"}, status=404)
+        return Response({"error": "Land not found or you do not have permission to delete it"}, status=status.HTTP_404_NOT_FOUND)
+
+    except Exception as e:
+        return Response({"error": "An error occurred", "details": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 @api_view(["PUT"])
 @permission_classes([IsAuthenticated])
 def edit_land(request, land_id):
-    land = get_object_or_404(Land, id=land_id)
-    # Ensure the land belongs to the authenticated user
-    if land.owner != request.user:
-        return Response({"message": "You do not have permission to edit this land."}, status=403)
-    serializer = LandSerializer(land, data=request.data, partial=True) 
-    if serializer.is_valid():
-        serializer.save()
-        return Response({"message": "Land updated successfully!", "data": serializer.data}) 
-    return Response({"message": "Invalid data", "errors": serializer.errors}, status=400)
+    try:
+        land = get_object_or_404(Land, land_id=land_id, owner=request.user)
+
+        # ✅ Allow updates with only changed fields
+        serializer = LandSerializer(land, data=request.data, partial=True)  
+
+        if serializer.is_valid():
+            serializer.save()
+            return Response(
+                {"message": "Land updated successfully!", "data": serializer.data},
+                status=status.HTTP_200_OK
+            )
+
+        return Response(
+            {"error": "Invalid data", "details": serializer.errors},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+    except Exception as e:
+        return Response({"error": "An error occurred", "details": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 @api_view(["POST"])

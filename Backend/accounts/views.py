@@ -109,3 +109,23 @@ class UserDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = [IsCustomAdmin]  # Use custom permission
+
+@api_view(["PUT"])
+@permission_classes([IsAuthenticated])
+def update_profile(request):
+    user = request.user  # Get the logged-in user
+
+    # ✅ Use serializer for validation
+    serializer = UserSerializer(user, data=request.data, partial=True)
+
+    if serializer.is_valid():
+        serializer.save()
+        return Response(
+            {"message": "Profile updated successfully!", "data": serializer.data},
+            status=status.HTTP_200_OK
+        )
+
+    return Response(
+        {"error": "Invalid data", "details": serializer.errors},
+        status=status.HTTP_400_BAD_REQUEST
+    )

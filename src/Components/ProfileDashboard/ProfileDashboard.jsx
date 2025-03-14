@@ -11,7 +11,6 @@ const ProfileDashboard = () => {
     const [showEditModal, setShowEditModal] = useState(false);
     const [selectedLand, setSelectedLand] = useState(null);
     const [formData, setFormData] = useState({
-        name: "",
         location: "",
         state: "",
         district: "",
@@ -26,6 +25,15 @@ const ProfileDashboard = () => {
         available_to: "",
         description: "",
     });
+    //profile data
+    const [showProfileEditModal, setShowProfileEditModal] = useState(false);
+    const [profileData, setProfileData] = useState({
+        full_name: user?.full_name || "",
+        email: user?.email || "",
+        phone: user?.phone || "",
+        profile_photo: null
+    });
+
     
 
     useEffect(() => {
@@ -64,29 +72,62 @@ const ProfileDashboard = () => {
   };
 
   const handleEdit = (land) => {
-      setSelectedLand(land);
-      setShowEditModal(true);
-  };
+    setSelectedLand(land);
+    setFormData({ 
+        location: land.location || "", 
+        state: land.state || "",
+        district: land.district || "",
+        price: land.price || "",
+        area: land.area || "",
+        land_type: land.land_type || "Agricultural",
+        land_status: land.land_status || "Available",
+        soil_quality: land.soil_quality || "",
+        utilities_available: land.utilities_available || "",
+        land_access: land.land_access || "",
+        available_from: land.available_from || "",
+        available_to: land.available_to || "",
+        description: land.description || ""
+    });
+    setShowEditModal(true);
+};
 
-  const handleEditSubmit = async () => {
-      try {
-        console.log(formData);
+const handleEditSubmit = async () => {
+    try {
         const token = await getAccessToken();
-          await axios.put(`http://127.0.0.1:8000/landapi/lands/${selectedLand.land_id}/edit`, formData, {
-              headers: { Authorization: `Bearer ${token}` }
-          });
-          fetchLands();
-          setShowEditModal(false);
-      } catch (error) {
-          console.error("Error updating land", error);
-      }
-  };
+        
+        // ✅ Ensure comparison works even if selectedLand has missing fields
+        const updatedFields = {};
+        Object.keys(formData).forEach((key) => {
+            if ((formData[key] || "") !== (selectedLand[key] || "")) { 
+                updatedFields[key] = formData[key]; 
+            }
+        });
+
+        if (Object.keys(updatedFields).length === 0) {
+            alert("No changes detected.");
+            return;
+        }
+
+        await axios.put(
+            `http://127.0.0.1:8000/landapi/lands/${selectedLand.land_id}/edit/`, 
+            updatedFields, 
+            { headers: { Authorization: `Bearer ${token}` } }
+        );
+
+        console.log("Update response:", updatedFields);
+        fetchLands();  // Refresh land list
+        setShowEditModal(false);
+    } catch (error) {
+        console.error("Error updating land:", error.response?.data || error);
+        alert("Failed to update land: " + JSON.stringify(error.response?.data || error));
+    }
+};
 
   const handleDelete = async (landId) => {
     if (window.confirm("Are you sure you want to delete this land?")) {
         try {
           const token = await getAccessToken();
-            await axios.delete(`http://127.0.0.1:8000/landapi/lands/${landId}/delete`, {
+            await axios.delete(`http://127.0.0.1:8000/landapi/lands/${landId}/delete/`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             fetchLands();
@@ -95,6 +136,34 @@ const ProfileDashboard = () => {
         }
     }
 };
+
+const handleProfileUpdate = async () => {
+    try {
+        const token = await getAccessToken();
+
+        const formData = new FormData();
+        formData.append("full_name", profileData.full_name);
+        formData.append("email", profileData.email);
+        formData.append("phone", profileData.phone);
+        if (profileData.profile_photo) {
+            formData.append("profile_photo", profileData.profile_photo);
+        }
+
+        await axios.put(
+            "http://127.0.0.1:8000/api/user/update/", 
+            formData, 
+            { headers: { Authorization: `Bearer ${token}`, "Content-Type": "multipart/form-data" } }
+        );
+
+        alert("Profile updated successfully!");
+        setShowProfileEditModal(false);
+        fetchUserData(); // Refresh user details
+    } catch (error) {
+        console.error("Error updating profile:", error.response?.data || error);
+        alert("Failed to update profile.");
+    }
+};
+
 
     return (
         <Container className="mt-4">
@@ -118,6 +187,7 @@ const ProfileDashboard = () => {
                                 <Card.Text><strong>Full Name:</strong> {user.full_name || "N/A"}</Card.Text>
                                 <Card.Text><strong>Email:</strong> {user.email}</Card.Text>
                                 <Card.Text><strong>Phone:</strong> {user.phone || "N/A"}</Card.Text>
+                                <Button variant="primary" onClick={() => setShowProfileEditModal(true)}>Edit</Button>
                             </Col>
                         </Row>
                     </Card.Body>
@@ -125,7 +195,7 @@ const ProfileDashboard = () => {
             ) : (
                 <p className="text-muted">Loading user data...</p>
             )}
-                    <div className="container mt-4">
+        <div className="container mt-4">
             <h3>My Lands</h3>
             <div className="row">
                 {lands.map((land) => (
@@ -133,11 +203,12 @@ const ProfileDashboard = () => {
                         <div className="card mb-3">
                             <div className="card-body">
                                 <h5 className="card-title">{land.name}</h5>
+                                <p className="card-text">Area: {land.area} Sq.ft</p>
                                 <p className="card-text">Location: {land.location}</p>
                                 <p className="card-text">Available From : {land.available_from}</p>
                                 <p className="card-text">Available To : {land.available_to}</p>
                                 <p className="card-text">Land Type : {land.land_type}</p>
-                                <p className="card-text">Price: {land.price}₹</p>
+                                <p className="card-text">Price: {land.price}₹/month</p>
                                 <Button variant="primary" onClick={() => handleEdit(land)}>Edit</Button>
                                 <Button variant="danger" className="ms-2" onClick={() => handleDelete(land.land_id)}>Delete</Button>
                             </div>
@@ -153,14 +224,6 @@ const ProfileDashboard = () => {
     </Modal.Header>
     <Modal.Body>
         <Form>
-            <Form.Group className="mb-3">
-                <Form.Label>Name</Form.Label>
-                <Form.Control 
-                    type="text" 
-                    value={formData.name} 
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })} 
-                />
-            </Form.Group>
             <Form.Group className="mb-3">
                 <Form.Label>Location</Form.Label>
                 <Form.Control 
@@ -280,7 +343,54 @@ const ProfileDashboard = () => {
     </Modal.Footer>
 </Modal>
 
+{/* Edit Profile Modal */}
+<Modal show={showProfileEditModal} onHide={() => setShowProfileEditModal(false)}>
+    <Modal.Header closeButton>
+        <Modal.Title>Edit Profile</Modal.Title>
+    </Modal.Header>
+    <Modal.Body>
+        <Form>
+            <Form.Group className="mb-3">
+                <Form.Label>Full Name</Form.Label>
+                <Form.Control 
+                    type="text" 
+                    value={profileData.full_name} 
+                    onChange={(e) => setProfileData({ ...profileData, full_name: e.target.value })} 
+                />
+            </Form.Group>
+            <Form.Group className="mb-3">
+                <Form.Label>Email</Form.Label>
+                <Form.Control 
+                    type="email" 
+                    value={profileData.email} 
+                    onChange={(e) => setProfileData({ ...profileData, email: e.target.value })} 
+                />
+            </Form.Group>
+            <Form.Group className="mb-3">
+                <Form.Label>Phone</Form.Label>
+                <Form.Control 
+                    type="text" 
+                    value={profileData.phone} 
+                    onChange={(e) => setProfileData({ ...profileData, phone: e.target.value })} 
+                />
+            </Form.Group>
+            <Form.Group className="mb-3">
+                <Form.Label>Profile Photo</Form.Label>
+                <Form.Control 
+                    type="file" 
+                    onChange={(e) => setProfileData({ ...profileData, profile_photo: e.target.files[0] })} 
+                />
+            </Form.Group>
+        </Form>
+    </Modal.Body>
+    <Modal.Footer>
+        <Button variant="secondary" onClick={() => setShowProfileEditModal(false)}>Close</Button>
+        <Button variant="primary" onClick={handleProfileUpdate}>Save Changes</Button>
+    </Modal.Footer>
+</Modal>
+
         </div>
+        
         </Container>
         
     );
