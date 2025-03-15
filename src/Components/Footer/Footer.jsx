@@ -1,9 +1,20 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { FaFacebook, FaTwitter, FaInstagram, FaEnvelope, FaPhone, FaMapMarkerAlt } from 'react-icons/fa';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 function Footer() {
+  const [user, setUser] = useState(JSON.parse(localStorage.getItem("user")) || null);
+  const role=localStorage.getItem("role");
+
+  if (role === "admin") {
+    return (
+      <footer className="bg-dark text-light text-center py-3 fixed-bottom">
+        <p className="mb-0">&copy; 2024 Admin Panel | LandRentSystem</p>
+      </footer>
+    );
+  }
+
   return (
     <footer className="bg-dark text-light py-4 footer">
       <div className="container">
@@ -17,9 +28,10 @@ function Footer() {
 
           {/* ✅ Quick Links */}
           <div className="col-md-3">
+
             <h5>Quick Links</h5>
             <ul className="list-unstyled">
-              <li><Link to="/" className="text-light text-decoration-none">Home</Link></li>
+              <li><Link to={user ? "/dashboard" : "/"} className="text-light text-decoration-none">Home</Link></li>
               <li><Link to="/all-lands" className="text-light text-decoration-none">Browse Lands</Link></li>
               <li><Link to="/about" className="text-light text-decoration-none">About Us</Link></li>
               <li><Link to="/contact" className="text-light text-decoration-none">Contact</Link></li>

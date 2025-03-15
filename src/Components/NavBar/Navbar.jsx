@@ -88,7 +88,7 @@ const handleSuggestionClick = (suggestion) => {
             <li className="nav-item"><Link className="nav-link" to={user ? "/dashboard" : "/"}>Home</Link></li>
             <li className="nav-item"><Link className="nav-link" to="/about">About</Link></li>
             <li className="nav-item"><Link className="nav-link" to="/all-lands">Lands</Link></li>
-            <li className="nav-item"><a className="nav-link" href="#contact">Contact</a></li>
+            <li className="nav-item"><Link className="nav-link" to="/contact">Contact</Link></li>
           </ul>
 
 

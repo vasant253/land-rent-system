@@ -30,6 +30,14 @@ class LandUploadView(APIView):
         serializer = LandSerializer(lands, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+#get land by userid
+@api_view(["GET"])
+@permission_classes([AllowAny])  # Publicly accessible
+def get_user_lands_by_id(request, user_id):
+    lands = Land.objects.filter(owner=user_id)  # Get lands owned by user
+    serializer = LandSerializer(lands, many=True)
+    return Response(serializer.data)
+
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def land_list_create(request):
@@ -149,7 +157,6 @@ def create_rent_request(request, land_id):
         renter=request.user,
         status__in=["Pending", "Accepted"]
     ).first()
-
     if existing_request:
         return Response(
             {"message": "You already have a rent request", "status": existing_request.status},
@@ -195,8 +202,16 @@ def manage_rent_request(request, request_id):
 
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
-def get_land_requests(request):
-    rent_requests = RentRequest.objects.filter(land__owner=request.user)
+def get_land_requests(request, land_id=None):
+    """
+    ✅ Fetch all rent requests for lands owned by the logged-in user.
+    ✅ If `land_id` is provided, fetch only requests for that specific land.
+    """
+    if land_id:
+        rent_requests = RentRequest.objects.filter(land_id=land_id, owner=request.user)
+    else:
+        rent_requests = RentRequest.objects.filter(owner=request.user)
+
     serializer = RentRequestSerializer(rent_requests, many=True)
     return Response(serializer.data)
 

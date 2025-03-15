@@ -10,4 +10,4 @@ class CustomUserAdmin(admin.ModelAdmin):
     list_filter = ('is_staff', 'is_active')
     list_editable = ('role',)
 
-# OR Simply: admin.site.register(User)
+

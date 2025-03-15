@@ -16,4 +16,13 @@ class CustomUser(AbstractUser):
 
     def __str__(self):
         return self.username
+    
+class ContactMessage(models.Model):
+    name = models.CharField(max_length=255)
+    email = models.EmailField()
+    message = models.TextField()
+    sent_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Message from {self.name} ({self.email})"
 

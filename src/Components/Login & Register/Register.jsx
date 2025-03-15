@@ -12,6 +12,7 @@ const UserRegistration = () => {
     profile_photo: null , // File upload
   });
 
+  const [isSendingOtp, setIsSendingOtp] = useState(false);
   const [otp, setOtp] = useState("");
   const [otpSent, setOtpSent] = useState(false);
   const [otpVerified, setOtpVerified] = useState(false);
@@ -52,6 +53,7 @@ const UserRegistration = () => {
     try {
       const response = await axios.post("http://127.0.0.1:8000/api/send-otp/", { email: formData.email });
       setOtpSent(true);
+      setError(null);
       setMessage(response.data.message);
     } catch (error) {
       setError(error.response?.data?.error || "Failed to send OTP");
@@ -60,13 +62,16 @@ const UserRegistration = () => {
 
   // ✅ Verify OTP
   const verifyOtp = async () => {
+    setIsSendingOtp(true);
     try {
       const response = await axios.post("http://127.0.0.1:8000/api/verify-otp/", { email: formData.email, otp });
       setOtpVerified(true);
       setMessage(response.data.message);
     } catch (error) {
       setError(error.response?.data?.error || "Invalid OTP");
-    }
+    }finally {
+      setIsSendingOtp(false);  // ✅ Stop loading
+  }
   };
 
   // ✅ Check Password Strength
@@ -157,8 +162,21 @@ const UserRegistration = () => {
           </div>
 
           {/* ✅ Send OTP Button */}
-          {!otpSent && <button type="button" className="btn btn-primary w-100" onClick={sendOtp}>Send OTP</button>}
-
+          {!otpSent && (
+    <button 
+        type="button" 
+        className="btn btn-primary w-100" 
+        onClick={sendOtp} 
+        disabled={isSendingOtp} // ✅ Disable button when loading
+    >
+        {isSendingOtp ? (
+            <>
+                <span className="spinner-border spinner-border-sm me-2"></span> 
+                Sending...
+            </>
+        ) : "Send OTP"}
+    </button>
+)}
           {/* ✅ OTP Input */}
           {otpSent && !otpVerified && (
             <>

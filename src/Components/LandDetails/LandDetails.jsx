@@ -4,6 +4,7 @@ import { useParams,useNavigate } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { Carousel, Container, Row, Col, Button, Card, ListGroup } from "react-bootstrap";
 import "./LandDetails.css";
+import { Link } from "react-router-dom";
 
 const LandDetails = () => {
   const navigate= useNavigate();
@@ -131,11 +132,13 @@ const LandDetails = () => {
             <h3 className="mb-3">Owner Details</h3>
             <Row className="align-items-center">
               <Col xs={3} className="text-center">
+              <Link to={`/profile/${land.owner.id}`} className="text-primary fw-bold">
                 <img
                   src={`http://127.0.0.1:8000${land.owner.profile_photo}`}
                   alt="Owner"
                   className="profile-image"
                 />
+              </Link>
               </Col>
               <Col xs={9}>
                 <p><strong>Name:</strong> {land.owner.full_name}</p>

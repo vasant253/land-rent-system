@@ -18,6 +18,8 @@ import ManageUsers from './Components/AdminManage/ManageUsers';
 import AllLands from './Components/LandList/AllLands';
 import SearchResults from './Components/LandList/SearchResults';
 import FilteredLands from './Components/LandList/FilteredLands';
+import PublicProfile from './Components/ProfileDashboard/PublicProfile';
+import Contact from './Components/Contact Page/Contact';
 
 
 
@@ -53,11 +55,13 @@ function App() {
           <Routes>
             <Route path="*" element={<AuthRedirector />} />
             <Route path='/' element={<Home/>} />
+            <Route path="/profile/:userId" element={<PublicProfile />} />
             <Route path='/about' element={<AboutUs/>} />
             <Route path='/landUpload' element={<LandUpload/>} />
             <Route path='/login' element={<Login/>} />
             <Route path="/lands/:category" element={<FilteredLands />} />
             <Route path="/search" element={<SearchResults />} />
+            <Route path="/contact" element={<Contact />} />
             <Route path="/admin" element={<PrivateRoute element={<AdminDashboard />} allowedRole="admin" />} />
             <Route path="/profile" element={<ProfileDashboard />} />
             <Route path="/dashboard" element={<PrivateRoute element={<UserDashboard />} allowedRole="user" />} /> 

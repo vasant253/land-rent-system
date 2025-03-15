@@ -5,7 +5,7 @@ from rest_framework.permissions import AllowAny
 from django.contrib.auth import get_user_model
 from django.contrib.auth.hashers import check_password
 from rest_framework_simplejwt.tokens import RefreshToken
-from .serializers import UserSerializer
+from .serializers import UserSerializer,ContactMessageSerializer
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from django.contrib.auth import authenticate
 from django.core.exceptions import ObjectDoesNotExist
@@ -17,6 +17,7 @@ import random
 from django.core.cache import cache
 from django.core.mail import send_mail
 from django.conf import settings
+from django.shortcuts import get_object_or_404
 
 User = get_user_model()
 
@@ -32,6 +33,24 @@ def get_user_details(request):
         "full_name":user.full_name,
         "profile_photo": request.build_absolute_uri(user.profile_photo.url) if user.profile_photo else None,
     })
+
+#contact page
+@api_view(["POST"])
+@permission_classes([AllowAny])
+def contact_form_submission(request):
+    serializer = ContactMessageSerializer(data=request.data)
+    if serializer.is_valid():
+        serializer.save()
+        return Response({"message": "Message sent successfully!"}, status=status.HTTP_200_OK)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+#fetch by user id
+@api_view(["GET"])
+@permission_classes([AllowAny])  # Allows any user to view public profiles
+def get_user_profile(request, user_id):
+    user = get_object_or_404(User, id=user_id)
+    serializer = UserSerializer(user)
+    return Response(serializer.data)
 
 # User Registration View
 class RegisterUserView(APIView):

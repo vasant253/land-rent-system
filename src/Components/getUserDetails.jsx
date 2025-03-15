@@ -33,8 +33,7 @@ export const getUserDetails = async () => {
         return retryResponse.data;
       } catch (refreshError) {
         console.error("Token refresh failed. Please log in again.");
-        localStorage.removeItem("accessToken");
-        localStorage.removeItem("refreshToken");
+        localStorage.clear();
         return null;
       }
     } else {

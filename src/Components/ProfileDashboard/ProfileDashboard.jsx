@@ -3,10 +3,14 @@ import axios from "axios";
 import { Container, Card, Row, Col } from "react-bootstrap";
 import { Button, Modal, Form } from "react-bootstrap";
 import { getAccessToken } from "../../auth";
+import { Link } from "react-router-dom";
 
 const ProfileDashboard = () => {
     
+    //user data
     const [user, setUser] = useState(null);
+
+    //land data
     const [lands, setLands] = useState([]);
     const [showEditModal, setShowEditModal] = useState(false);
     const [selectedLand, setSelectedLand] = useState(null);
@@ -25,6 +29,7 @@ const ProfileDashboard = () => {
         available_to: "",
         description: "",
     });
+
     //profile data
     const [showProfileEditModal, setShowProfileEditModal] = useState(false);
     const [profileData, setProfileData] = useState({
@@ -34,11 +39,11 @@ const ProfileDashboard = () => {
         profile_photo: null
     });
 
-    
 
     useEffect(() => {
         fetchUserData();
         fetchLands();
+        
     }, []);
 
     const fetchUserData = async () => {
@@ -147,7 +152,6 @@ const handleEditProfile = () => {
     setShowProfileEditModal(true);
 };
 
-
 const handleProfileUpdate = async () => {
     try {
         const token = await getAccessToken();
@@ -187,6 +191,30 @@ const handleProfileUpdate = async () => {
         alert("Failed to update profile.");
     }
 };
+
+const [selectedLandRequests, setSelectedLandRequests] = useState([]);  // ✅ Store requests for selected land
+const [showRequestsModal, setShowRequestsModal] = useState(false);
+const [selectedLandName, setSelectedLandName] = useState("");
+
+const fetchLandRequests = async (landId) => {
+    try {
+        const token = await getAccessToken();
+        const response = await axios.get(`http://127.0.0.1:8000/landapi/get-land-requests/${landId}/`, {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+
+        setSelectedLandRequests(response.data); // ✅ Store requests in state
+        setSelectedLandName(lands.find((land) => land.land_id === landId)?.name || "Selected Land");
+        setShowRequestsModal(true); // ✅ Open modal
+    } catch (error) {
+        console.error("Error fetching rent requests:", error);
+    }
+};
+
+const handleRentRequestAction = async (id)=>{
+    return id;
+}
+
 
 
 
@@ -236,11 +264,82 @@ const handleProfileUpdate = async () => {
                                 <p className="card-text">Price: {land.price}₹/month</p>
                                 <Button variant="primary" onClick={() => handleEdit(land)}>Edit</Button>
                                 <Button variant="danger" className="ms-2" onClick={() => handleDelete(land.land_id)}>Delete</Button>
+                                <Button variant="info" className="ms-2"onClick={() => fetchLandRequests(land.land_id)}>Requests</Button>
                             </div>
                         </div>
                     </div>
                 ))}
             </div>
+
+                {/* request Modal */}
+                <Modal show={showRequestsModal} onHide={() => setShowRequestsModal(false)}>
+    <Modal.Header closeButton>
+        <Modal.Title>Rent Requests</Modal.Title>
+    </Modal.Header>
+
+    {/* ✅ Fixed Size & Scrollable Modal Body */}
+    <Modal.Body style={{ maxHeight: "400px", overflowY: "auto" }}>
+        {selectedLandRequests.length > 0 ? (
+            <div className="list-group">
+
+                {/* ✅ Table-Like Header (Aligned) */}
+                <div className="list-group-item bg-light fw-bold d-flex align-items-center" 
+                     style={{ display: "flex", justifyContent: "space-between" }}>
+                    <div className="col-4 text-start">Renter</div>
+                    <div className="col-3 text-center">Status</div>
+                    <div className="col-5 text-end">Actions</div>
+                </div>
+
+                {/* ✅ Requests List */}
+                {selectedLandRequests.map((request) => (
+                    <div key={request.id} className="list-group-item d-flex align-items-center"
+                         style={{ display: "flex", justifyContent: "space-between" }}>
+                        {/* ✅ Fixed Username Column */}
+                        <div className="col-4 text-truncate" style={{ maxWidth: "120px" }} title={request.renter_name}>
+                            <Link to={`/profile/${request.renter}`} className="text-primary fw-bold">
+                                {request.renter_name}
+                            </Link>
+                        </div>
+
+                        {/* ✅ Status Badge */}
+                        <div className="col-3 text-center">
+                            <span className={`badge 
+                                ${request.status === "Pending" ? "bg-warning text-dark" : ""}
+                                ${request.status === "Accepted" ? "bg-success" : ""}
+                                ${request.status === "Rejected" ? "bg-danger" : ""}`}>
+                                {request.status}
+                            </span>
+                        </div>
+
+                        {/* ✅ Action Buttons */}
+                        <div className="col-5 text-end">
+                            {request.status === "Pending" && (
+                                <>
+                                    <Button size="sm" variant="success" className="me-2"
+                                        onClick={() => handleRentRequestAction(request.id, "accept")}>
+                                        Accept
+                                    </Button>
+                                    <Button size="sm" variant="danger"
+                                        onClick={() => handleRentRequestAction(request.id, "reject")}>
+                                        Reject
+                                    </Button>
+                                </>
+                            )}
+                        </div>
+                    </div>
+                ))}
+            </div>
+        ) : (
+            <p className="text-center">No requests for this land.</p>
+        )}
+    </Modal.Body>
+
+    <Modal.Footer>
+        <Button variant="secondary" onClick={() => setShowRequestsModal(false)}>Close</Button>
+    </Modal.Footer>
+</Modal>
+
+
 
             {/* Edit Modal */}
 <Modal show={showEditModal} onHide={() => setShowEditModal(false)}>
@@ -413,9 +512,7 @@ const handleProfileUpdate = async () => {
         <Button variant="primary" onClick={handleProfileUpdate}>Save Changes</Button>
     </Modal.Footer>
 </Modal>
-
         </div>
-        
         </Container>
         
     );
