@@ -20,6 +20,7 @@ import SearchResults from './Components/LandList/SearchResults';
 import FilteredLands from './Components/LandList/FilteredLands';
 import PublicProfile from './Components/ProfileDashboard/PublicProfile';
 import Contact from './Components/Contact Page/Contact';
+import ManageLands from './Components/AdminManage/ManageLands';
 
 
 
@@ -65,7 +66,8 @@ function App() {
             <Route path="/admin" element={<PrivateRoute element={<AdminDashboard />} allowedRole="admin" />} />
             <Route path="/profile" element={<ProfileDashboard />} />
             <Route path="/dashboard" element={<PrivateRoute element={<UserDashboard />} allowedRole="user" />} /> 
-            <Route path="/usersList" element={<PrivateRoute element={<ManageUsers />} allowedRole="admin" /> } />
+            <Route path="/manage/usersList" element={<PrivateRoute element={<ManageUsers />} allowedRole="admin" /> } />
+            <Route path="/manage/lands" element={<PrivateRoute element={<ManageLands />} allowedRole="admin" /> } />
             <Route path='/register' element={<Register/>} />
             <Route path="/all-lands" element={<AllLands />} />
             <Route path="/land/:id" element={<LandDetails />} />

@@ -67,7 +67,7 @@ const ProfileDashboard = () => {
     const fetchLands = async () => {
       try {
         const token = await getAccessToken();
-          const response = await axios.get("http://127.0.0.1:8000/landapi/user/lands", {
+          const response = await axios.get("http://127.0.0.1:8000/landapi/user/lands/", {
               headers: { Authorization: `Bearer ${token}` }
           });
           setLands(response.data);
@@ -256,6 +256,7 @@ const handleRentRequestAction = async (id)=>{
                         <div className="card mb-3">
                             <div className="card-body">
                                 <h5 className="card-title">{land.name}</h5>
+                                <h4 className={`card-text text-${land.status === "Pending" ? "warning" : land.status === "Approved" ? "success" : "danger"}`}>{land.status}</h4>
                                 <p className="card-text">Area: {land.area} Sq.ft</p>
                                 <p className="card-text">Location: {land.location}</p>
                                 <p className="card-text">Available From : {land.available_from}</p>

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { Table, Button, Container, Spinner } from "react-bootstrap";
+import { getAccessToken } from "../../auth";
 
 const ManageUsers = () => {
   const [users, setUsers] = useState([]);
@@ -12,8 +13,8 @@ const ManageUsers = () => {
 
   const fetchUsers = async () => {
     try {
-      const token = localStorage.getItem("accessToken");
-      const res = await axios.get("http://localhost:8000/api/usersList", {
+      const token = await getAccessToken();
+      const res = await axios.get("http://127.0.0.1:8000/api/usersList/", {
         headers: { Authorization: `Bearer ${token}` },
       });
       setUsers(res.data);
@@ -25,16 +26,26 @@ const ManageUsers = () => {
   };
 
   const deleteUser = async (id) => {
+    const confirmDelete = window.confirm("Are you sure you want to delete this user?");
+    if (!confirmDelete) return; // ⛔ Stop if user cancels
+  
     try {
-      const token = localStorage.getItem("accessToken");
-      await axios.delete(`http://localhost:8000/api/admin/users/${id}/`, {
+      const token = await getAccessToken();
+      await axios.delete(`http://localhost:8000/api/usersList/${id}/`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setUsers(users.filter((user) => user.id !== id));
+  
+      setUsers(users.filter((user) => user.id !== id)); // ✅ Remove user from UI
     } catch (error) {
+      if (error.response && error.response.status === 403) {
+        alert(error.response.data.detail || "You cannot delete your own account!");
+      } else {
+        alert("Failed to delete user. Please try again.");
+      }
       console.error("Error deleting user:", error);
     }
   };
+  
 
   return (
     <Container className="mt-4">
@@ -50,7 +61,6 @@ const ManageUsers = () => {
               <th>ID</th>
               <th>Username</th>
               <th>Email</th>
-              <th>Role</th>
               <th>Actions</th>
             </tr>
           </thead>
@@ -60,7 +70,6 @@ const ManageUsers = () => {
                 <td>{user.id}</td>
                 <td>{user.username}</td>
                 <td>{user.email}</td>
-                <td>{user.role}</td>
                 <td>
                   <Button
                     variant="danger"

@@ -13,7 +13,7 @@ const AdminDashboard = () => {
           <Card className="shadow">
             <Card.Body>
               <Card.Title>Manage Users</Card.Title>
-              <Button variant="primary" onClick={() => navigate("/usersList")}>
+              <Button variant="primary" onClick={() => navigate("/manage/usersList")}>
                 View Users
               </Button>
             </Card.Body>
@@ -23,7 +23,7 @@ const AdminDashboard = () => {
           <Card className="shadow">
             <Card.Body>
               <Card.Title>Manage Lands</Card.Title>
-              <Button variant="primary" onClick={() => navigate("/admin/lands")}>
+              <Button variant="primary" onClick={() => navigate("/manage/lands")}>
                 View Lands
               </Button>
             </Card.Body>
@@ -32,7 +32,7 @@ const AdminDashboard = () => {
         <Col md={4}>
           <Card className="shadow">
             <Card.Body>
-              <Card.Title>Manage Images</Card.Title>
+              <Card.Title>Manage Feedbacks</Card.Title>
               <Button variant="primary" onClick={() => navigate("/admin/images")}>
                 View Images
               </Button>

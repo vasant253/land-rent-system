@@ -14,6 +14,7 @@ from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework import generics, status, permissions
 from rest_framework.decorators import api_view, permission_classes
 import random
+from rest_framework.exceptions import PermissionDenied
 from django.core.cache import cache
 from django.core.mail import send_mail
 from django.conf import settings
@@ -131,14 +132,25 @@ class ProtectedView(APIView):
 from .permissions import IsCustomAdmin  # Import the custom permission
 
 class UserListView(generics.ListCreateAPIView):
-    queryset = User.objects.all()
     serializer_class = UserSerializer
-    permission_classes = [IsCustomAdmin]  # Use custom permission
+    permission_classes = [IsCustomAdmin] 
+
+    def get_queryset(self):
+        return User.objects.filter(is_active=True)  # Only fetch active users
+
 
 class UserDetailView(generics.RetrieveUpdateDestroyAPIView):
-    queryset = User.objects.all()
     serializer_class = UserSerializer
-    permission_classes = [IsCustomAdmin]  # Use custom permission
+    permission_classes = [IsCustomAdmin]  
+
+    def get_queryset(self):
+        return User.objects.all()
+
+    def perform_destroy(self, instance):
+        if self.request.user == instance:
+            raise PermissionDenied("You cannot delete your own account!")
+        instance.delete()
+
 
 @api_view(["PUT"])
 @permission_classes([IsAuthenticated])
@@ -205,3 +217,4 @@ def verify_otp(request):
         return Response({"message": "OTP verified!"}, status=200)
 
     return Response({"error": "Invalid OTP"}, status=400)
+

@@ -3,6 +3,7 @@ from .views import LandUploadView,land_list_create,get_land_details,create_rent_
 from django.conf import settings
 from django.conf.urls.static import static
 from .views import get_user_lands,edit_land,delete_land,search_lands,suggest_lands,get_user_lands_by_id
+from .views import get_pending_lands,manage_land_status
 
 urlpatterns = [
     path("upload-land/", LandUploadView.as_view(), name="upload_land"),
@@ -17,6 +18,8 @@ urlpatterns = [
     path("search/", search_lands, name="search_lands"),
     path("suggest/", suggest_lands, name="suggest_lands"),
     path("lands/user/<int:user_id>/", get_user_lands_by_id, name="get-user-lands"),
+    path("lands/pending/", get_pending_lands, name="get-pending-lands"),
+    path("lands/<int:id>/status/", manage_land_status, name="manage-land-status"),
 
 ]
 

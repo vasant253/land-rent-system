@@ -14,6 +14,11 @@ class Land(models.Model):
     land_access = models.CharField(max_length=255, help_text="Road access, transportation")
     price = models.DecimalField(max_digits=12, decimal_places=2)
     land_status = models.CharField(max_length=50, choices=[('Available', 'Available'), ('Rented', 'Rented'), ('Sold', 'Sold')],default="Available")
+    status = models.CharField(
+        max_length=20,
+        choices=[("Pending", "Pending"), ("Approved", "Approved"), ("Rejected", "Rejected")],
+        default="Pending"
+    )
     available_from = models.DateField()
     available_to = models.DateField()
     description = models.TextField()

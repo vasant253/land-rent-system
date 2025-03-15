@@ -22,7 +22,7 @@ class LandSerializer(serializers.ModelSerializer):
     class Meta:
         model = Land
         fields = [
-            "land_id", "owner", "location", "state", "district", "area", "land_type",
+            "land_id", "owner", "location", "state","status", "district", "area", "land_type",
             "utilities_available", "soil_quality", "land_access", "price", "land_status",
             "available_from", "available_to", "description", "created_at", "updated_at",
             "images", "uploaded_images"

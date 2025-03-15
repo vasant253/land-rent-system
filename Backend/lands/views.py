@@ -18,7 +18,7 @@ class LandUploadView(APIView):
     def post(self, request, *args, **kwargs):
         serializer = LandSerializer(data=request.data, context={"request": request})  # Pass request context
         if serializer.is_valid():
-            serializer.save()
+            serializer.save(status="Pending")
             return Response(
                 {"message": "Land details uploaded successfully", "data": serializer.data},
                 status=status.HTTP_201_CREATED
@@ -34,21 +34,21 @@ class LandUploadView(APIView):
 @api_view(["GET"])
 @permission_classes([AllowAny])  # Publicly accessible
 def get_user_lands_by_id(request, user_id):
-    lands = Land.objects.filter(owner=user_id)  # Get lands owned by user
+    lands = Land.objects.filter(owner=user_id,status="Approved")  # Get lands owned by user
     serializer = LandSerializer(lands, many=True)
     return Response(serializer.data)
 
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def land_list_create(request):
-    lands = Land.objects.all()
-    serializer = LandSerializer(lands, many=True)
+    lands = Land.objects.filter(status="Approved")
+    serializer = LandSerializer(lands, many=True,)
     return Response(serializer.data, status=status.HTTP_200_OK)
 
 @api_view(["GET"])
 @permission_classes([AllowAny])  
 def get_land_details(request, id):
-    land = get_object_or_404(Land, land_id=id)
+    land = get_object_or_404(Land, land_id=id,status="Approved")
     serializer = LandSerializer(land)
     return Response(serializer.data)
 
@@ -110,7 +110,7 @@ def search_lands(request):
         return Response({"error": "Search query is required."}, status=status.HTTP_400_BAD_REQUEST)
 
     # ✅ Filter lands based on the search query
-    lands = Land.objects.filter(
+    lands = Land.objects.filter(status="Approved").filter(
         location__icontains=query) | Land.objects.filter(
         state__icontains=query) | Land.objects.filter(
         district__icontains=query) | Land.objects.filter(
@@ -131,10 +131,10 @@ def suggest_lands(request):
         return Response([], status=status.HTTP_200_OK)
 
     # ✅ Get distinct values for location, state, district, or land_type
-    location_suggestions = Land.objects.filter(location__icontains=query).values_list("location", flat=True).distinct()
-    state_suggestions = Land.objects.filter(state__icontains=query).values_list("state", flat=True).distinct()
-    district_suggestions = Land.objects.filter(district__icontains=query).values_list("district", flat=True).distinct()
-    type_suggestions = Land.objects.filter(land_type__icontains=query).values_list("land_type", flat=True).distinct()
+    location_suggestions = Land.objects.filter(status="Approved",location__icontains=query).values_list("location", flat=True).distinct()
+    state_suggestions = Land.objects.filter(status="Approved",state__icontains=query).values_list("state", flat=True).distinct()
+    district_suggestions = Land.objects.filter(status="Approved",district__icontains=query).values_list("district", flat=True).distinct()
+    type_suggestions = Land.objects.filter(status="Approved",land_type__icontains=query).values_list("land_type", flat=True).distinct()
 
     # ✅ Combine all suggestions into one list (remove duplicates)
     suggestions = list(set(location_suggestions) | set(state_suggestions) | set(district_suggestions) | set(type_suggestions))
@@ -214,4 +214,35 @@ def get_land_requests(request, land_id=None):
 
     serializer = RentRequestSerializer(rent_requests, many=True)
     return Response(serializer.data)
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def get_pending_lands(request):
+    """ ✅ Fetch all lands with 'Pending' status for admin approval """
+    if request.user.role != "admin":  # ✅ Check role instead of is_staff
+        return Response({"error": "Unauthorized"}, status=status.HTTP_403_FORBIDDEN)
+
+    lands = Land.objects.filter(status="Pending")
+    serializer = LandSerializer(lands, many=True)
+    return Response(serializer.data)
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def manage_land_status(request, id):
+    """ ✅ Allows admin to approve or reject lands """
+    if request.user.role != "admin":  # ✅ Check role instead of is_staff
+        return Response({"error": "Unauthorized"}, status=status.HTTP_403_FORBIDDEN)
+
+    land = get_object_or_404(Land, land_id=id, status="Pending")  # Only pending lands
+
+    action = request.data.get("action")  # Expecting "approve" or "reject"
+    if action == "approve":
+        land.status = "Approved"
+    elif action == "reject":
+        land.status = "Rejected"
+    else:
+        return Response({"error": "Invalid action. Use 'approve' or 'reject'."}, status=400)
+
+    land.save()
+    return Response({"message": f"Land {action}d successfully."})
 
