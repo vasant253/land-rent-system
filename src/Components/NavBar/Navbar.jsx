@@ -51,8 +51,8 @@ const handleSuggestionClick = (suggestion) => {
 
   const handleLogout = () => {
       localStorage.clear(); // Removes all stored data
-      window.location.reload();
-      navigate("/login"); // Refresh the page to update UI
+      navigate("/login");
+      window.location.reload(); // Refresh the page to update UI
       setUser(null);
     };
 

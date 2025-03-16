@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { Table, Button, Container, Spinner } from "react-bootstrap";
+import { Table, Button, Container, Spinner, Modal } from "react-bootstrap";
 import { getAccessToken } from "../../auth";
 
 const ManageLands = () => {
   const [lands, setLands] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [selectedLand, setSelectedLand] = useState(null);
+  const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
     fetchLands();
@@ -23,6 +25,11 @@ const ManageLands = () => {
       console.error("Error fetching lands:", error);
       setLoading(false);
     }
+  };
+
+  const handleShowDetails = (land) => {
+    setSelectedLand(land);
+    setShowModal(true);
   };
 
   const handleLandAction = async (id, action) => {
@@ -70,7 +77,13 @@ const ManageLands = () => {
           <tbody>
             {lands.map((land) => (
               <tr key={land.land_id}>
-                <td>{land.land_id}</td>
+                  <td 
+                  className="text-primary fw-bold text-decoration-underline"
+                  style={{ cursor: "pointer" }}
+                  onClick={() => handleShowDetails(land)}  // ✅ Click ID to open modal
+                >
+                  {land.land_id}
+                </td>
                 <td>{land.owner.full_name}</td>
                 <td>{land.owner.email}</td>
                 <td>{land.location}</td>
@@ -100,6 +113,68 @@ const ManageLands = () => {
       ) : (
         <p className="text-center">No pending lands available.</p>
       )}
+  {/* ✅ Land Details Modal */}
+  <Modal show={showModal} onHide={() => setShowModal(false)} size="lg" centered>
+        <Modal.Header closeButton>
+          <Modal.Title>Land Details</Modal.Title>
+        </Modal.Header>
+        
+        {/* ✅ Scrollable Modal Body with Fixed Height */}
+        <Modal.Body style={{ maxHeight: "500px", overflowY: "auto" }}>
+          {selectedLand ? (
+            <div style={{ maxWidth: "600px", margin: "0 auto" }}>
+              <h5><strong>Owner:</strong> {selectedLand.owner.full_name}</h5>
+              <p><strong>Email:</strong> {selectedLand.owner.email}</p>
+              <p><strong>Location:</strong> {selectedLand.location}</p>
+              <p><strong>State:</strong> {selectedLand.state}</p>
+              <p><strong>District:</strong> {selectedLand.district}</p>
+              <p><strong>Land Type:</strong> {selectedLand.land_type}</p>
+              <p><strong>Area:</strong> {selectedLand.area} Sq.ft</p>
+              <p><strong>Soil Quality:</strong> {selectedLand.soil_quality}</p>
+              <p><strong>Utilities Available:</strong> {selectedLand.utilities_available}</p>
+              <p><strong>Land Access:</strong> {selectedLand.land_access}</p>
+              <p><strong>Price:</strong> ₹{selectedLand.price} per month</p>
+              <p><strong>Description:</strong> {selectedLand.description}</p>
+              <p><strong>Available From:</strong> {selectedLand.available_from}</p>
+              <p><strong>Available To:</strong> {selectedLand.available_to}</p>
+
+              {/* ✅ Display Images if Available */}
+              {selectedLand.images && selectedLand.images.length > 0 && (
+                <div>
+                  <h5>Land Images</h5>
+                  <div className="d-flex flex-wrap" style={{ maxHeight: "200px", overflowY: "auto" }}>
+                    {selectedLand.images.map((image, index) => (
+                      <img
+                        key={index}
+                        src={image.image}
+                        alt={`Land ${index + 1}`}
+                        className="m-2"
+                        style={{ width: "120px", height: "100px", objectFit: "cover", border: "1px solid #ddd", borderRadius: "5px" }}
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          ) : (
+            <p>Loading land details...</p>
+          )}
+        </Modal.Body>
+
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowModal(false)}>Close</Button>
+          {!selectedLand?.is_verified && (
+            <>
+              <Button variant="success" onClick={() => handleLandAction(selectedLand.land_id, "approve")}>
+                ✅ Approve
+              </Button>
+              <Button variant="danger" onClick={() => handleLandAction(selectedLand.land_id, "reject")}>
+                ❌ Reject
+              </Button>
+            </>
+          )}
+        </Modal.Footer>
+      </Modal>
     </Container>
   );
 };

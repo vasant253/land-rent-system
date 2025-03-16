@@ -1,13 +1,14 @@
 from django.urls import path
 from django.conf import settings
 from .views import RegisterUserView
-from .views import UserLoginView,UserListView, UserDetailView, get_user_details,update_profile
+from .views import UserLoginView,UserListView, UserDetailView, get_user_details,update_profile,UploadAadhaarView
 from rest_framework_simplejwt.views import TokenRefreshView
 from .views import ProtectedView,check_availability,verify_otp,send_otp,get_user_profile,contact_form_submission,verify_user
 
 urlpatterns = [
     path('register/', RegisterUserView.as_view(), name='register'),
     path("login/", UserLoginView.as_view(), name="login"),
+    path("user/upload-aadhaar/", UploadAadhaarView.as_view(), name="upload-aadhaar"),
     path("contact/", contact_form_submission, name="contact-form"),
     path("check-availability/", check_availability, name="check_availability"),
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),

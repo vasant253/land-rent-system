@@ -47,7 +47,7 @@ const ManageUsers = () => {
       setUsers(users.map(user => 
         user.id === userId ? { ...user, is_verified: true } : user
       ));
-
+      alert("Verification Successful!");
       setShowModal(false); // ✅ Close the modal
     } catch (error) {
       console.error("Error verifying user:", error);
@@ -83,7 +83,7 @@ const ManageUsers = () => {
   
 
   return (
-    <Container className="mt-4">
+    <Container className="mt-4 mb-4">
     <h2 className="text-center mb-4">Manage Users</h2>
     {/* ✅ Dropdown for Sorting */}
     <div className="d-flex justify-content-between align-items-center mb-3">
@@ -150,7 +150,7 @@ const ManageUsers = () => {
         </tbody>
       </Table>
     )}
-    <Modal show={showModal} onHide={() => setShowModal(false)} size="lg" centered>
+    <Modal show={showModal} onHide={() => setShowModal(false)} centered>
         <Modal.Header closeButton>
           <Modal.Title>Verify Aadhaar/PAN</Modal.Title>
         </Modal.Header>
@@ -158,11 +158,18 @@ const ManageUsers = () => {
           {selectedUser && selectedUser.aadhaar_pan_doc ? (
             <>
             <a href={selectedUser.aadhaar_pan_doc} target="_blank" rel="noopener noreferrer">
-              <img
-                src={selectedUser.aadhaar_pan_doc}
-                alt="Aadhaar/PAN Document"
-                style={{ maxWidth: "100%", height: "auto", borderRadius: "5px", border: "1px solid #ddd", cursor: "pointer" }}
-              />
+            <img
+                        src={selectedUser.aadhaar_pan_doc}
+                        alt="Aadhaar/PAN Document"
+                        style={{ 
+                            width: "300px",  // ✅ Fixed width 
+                            height: "400px", // ✅ Fixed height 
+                            objectFit: "contain", // ✅ Maintain aspect ratio without cropping
+                            borderRadius: "5px", 
+                            border: "1px solid #ddd", 
+                            cursor: "pointer" 
+                        }}
+                    />
             </a>
             <p className="mt-2">
               <a href={selectedUser.aadhaar_pan_doc} target="_blank" rel="noopener noreferrer" className="btn btn-outline-primary">

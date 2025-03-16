@@ -10,6 +10,13 @@ const ProfileDashboard = () => {
     //user data
     const [user, setUser] = useState(null);
 
+    //aadhar data
+    const [showAadhaarUploadModal, setShowAadhaarUploadModal] = useState(false); // ✅ Aadhaar modal control
+    const [aadhaarFile, setAadhaarFile] = useState(null); // ✅ Stores selected file
+    const [isUploadingAadhaar, setIsUploadingAadhaar] = useState(false); // ✅ Upload status
+
+
+
     //land data
     const [lands, setLands] = useState([]);
     const [showEditModal, setShowEditModal] = useState(false);
@@ -28,6 +35,7 @@ const ProfileDashboard = () => {
         available_from: "",
         available_to: "",
         description: "",
+        aadhar_pan_doc:null,
     });
 
     //profile data
@@ -36,8 +44,8 @@ const ProfileDashboard = () => {
         full_name: user?.full_name || "",
         email: user?.email || "",
         phone: user?.phone || "",
-        profile_photo: null,
-        aadhar_pan_doc:null,
+        profile_photo: null, // File upload field
+        aadhaar_pan_doc: null, // File upload field
     });
 
 
@@ -60,6 +68,7 @@ const ProfileDashboard = () => {
             });
 
             setUser(response.data);
+            console.log(response.data);
         } catch (error) {
             console.error("Error fetching user data:", error);
         }
@@ -92,7 +101,7 @@ const ProfileDashboard = () => {
         land_access: land.land_access || "",
         available_from: land.available_from || "",
         available_to: land.available_to || "",
-        description: land.description || ""
+        description: land.description || "",
     });
     setShowEditModal(true);
 };
@@ -148,7 +157,8 @@ const handleEditProfile = () => {
         full_name: user.full_name || "",
         email: user.email || "",
         phone: user.phone || "",
-        profile_photo: null  // Keep photo optional
+        profile_photo: null,  // Keep photo optional
+        aadhaar_pan_doc:null,
     });
     setShowProfileEditModal(true);
 };
@@ -172,8 +182,12 @@ const handleProfileUpdate = async () => {
             formData.append("profile_photo", profileData.profile_photo);
         }
 
+        if (profileData.aadhaar_pan_doc) {
+            formData.append("aadhaar_pan_doc", profileData.aadhaar_pan_doc);
+        }
+
         // ✅ Check if any field is actually changed
-        if (!formData.has("full_name") && !formData.has("email") && !formData.has("phone") && !formData.has("profile_photo")) {
+        if (!formData.has("full_name") && !formData.has("email") && !formData.has("phone") && !formData.has("profile_photo") && !formData.has("aadhaar_pan_doc")) {
             alert("No changes detected.");
             return;
         }
@@ -216,8 +230,45 @@ const handleRentRequestAction = async (id)=>{
     return id;
 }
 
+// ✅ Handle File Selection
+const handleUploadAadhaar = (e) => {
+    const file = e.target.files[0]; 
+    if (file) {
+        setAadhaarFile(file);
+    }
+};
 
+// ✅ Handle Aadhaar Upload
+const uploadAadhaar = async () => {
+    if (!aadhaarFile) {
+        alert("Please select a file before uploading.");
+        return;
+    }
 
+    const formData = new FormData();
+    formData.append("aadhaar_pan_doc", aadhaarFile);
+
+    try {
+        setIsUploadingAadhaar(true); // 🔄 Show "Uploading..."
+        const token = localStorage.getItem("accessToken");
+
+        await axios.put(
+            `http://127.0.0.1:8000/api/user/upload-aadhaar/`, 
+            formData, 
+            { headers: { Authorization: `Bearer ${token}`, "Content-Type": "multipart/form-data" } }
+        );
+
+        alert("Aadhaar uploaded successfully!");
+        fetchUserData(); // ✅ Refresh user data
+        setShowAadhaarUploadModal(false); // ✅ Close modal
+    } catch (error) {
+        console.error("Error uploading Aadhaar:", error);
+        alert("Failed to upload Aadhaar. Please try again.");
+    } finally {
+        setIsUploadingAadhaar(false); // ✅ Reset button state
+        setAadhaarFile(null); // ✅ Clear file selection
+    }
+};
 
     return (
         <Container className="mt-4">
@@ -245,10 +296,23 @@ const handleRentRequestAction = async (id)=>{
                                 <strong>Aadhaar/Pan Verification:</strong>{" "}
                                 {user.is_verified ? (
                                     <span className="text-success fw-bold">Verified ✅</span>
-                                ) : (
+                                ) : user.aadhaar_pan_doc ? (
                                     <span className="text-danger fw-bold">Not Verified ❌</span>
+                                ) : (
+                                    <div className="d-flex align-items-center">
+                                        <span className="text-warning fw-bold">Please upload Aadhaar details ⚠️</span>
+
+                                        {/* ✅ Upload Button (Opens Aadhaar Modal) */}
+                                        <Button 
+                                            variant="success" 
+                                            className="ms-2"
+                                            onClick={() => setShowAadhaarUploadModal(true)}
+                                        >
+                                            📤 Upload
+                                        </Button>
+                                    </div>
                                 )}
-                                </Card.Text>
+                            </Card.Text>
                                 <Button variant="primary" onClick={() => handleEditProfile()}>Edit</Button>
                             </Col>
                         </Row>
@@ -349,6 +413,35 @@ const handleRentRequestAction = async (id)=>{
     </Modal.Footer>
 </Modal>
 
+
+<Modal show={showAadhaarUploadModal} onHide={() => setShowAadhaarUploadModal(false)} centered>
+    <Modal.Header closeButton>
+        <Modal.Title>Upload Aadhaar/PAN</Modal.Title>
+    </Modal.Header>
+    <Modal.Body>
+        <Form>
+            {/* ✅ File Input Field */}
+            <Form.Group className="mb-3">
+                <Form.Label>Select Aadhaar/PAN File</Form.Label>
+                <Form.Control 
+                    type="file" 
+                    accept=".jpg,.png,.pdf" 
+                    onChange={handleUploadAadhaar}
+                />
+            </Form.Group>
+        </Form>
+    </Modal.Body>
+    <Modal.Footer>
+        <Button variant="secondary" onClick={() => setShowAadhaarUploadModal(false)}>Cancel</Button>
+        <Button 
+            variant="success" 
+            onClick={uploadAadhaar} 
+            disabled={!aadhaarFile || isUploadingAadhaar}
+        >
+            {isUploadingAadhaar ? "Uploading..." : "Submit"}
+        </Button>
+    </Modal.Footer>
+</Modal>
 
 
             {/* Edit Modal */}

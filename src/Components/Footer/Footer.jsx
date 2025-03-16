@@ -9,14 +9,14 @@ function Footer() {
 
   if (role === "admin") {
     return (
-      <footer className="bg-dark text-light text-center py-3 fixed-bottom">
+      <footer className="bg-dark text-light mt-4 text-center py-3 fixed-bottom">
         <p className="mb-0">&copy; 2024 Admin Panel | LandRentSystem</p>
       </footer>
     );
   }
 
   return (
-    <footer className="bg-dark text-light py-4 footer">
+    <footer className="bg-dark mt-4 text-light py-4 footer">
       <div className="container">
         <div className="row">
 

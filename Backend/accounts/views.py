@@ -33,8 +33,33 @@ def get_user_details(request):
         "phone":user.phone,
         "is_verified":user.is_verified,
         "full_name":user.full_name,
+        "aadhaar_pan_doc":request.build_absolute_uri(user.aadhaar_pan_doc.url) if user.aadhaar_pan_doc else None,
         "profile_photo": request.build_absolute_uri(user.profile_photo.url) if user.profile_photo else None,
     })
+
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework.response import Response
+from rest_framework import status
+from rest_framework.views import APIView
+from .models import CustomUser
+from .serializers import UserSerializer
+
+class UploadAadhaarView(APIView):
+    permission_classes = [IsAuthenticated]
+    parser_classes = (MultiPartParser, FormParser)  # ✅ Supports file upload
+
+    def put(self, request):
+        user = request.user  # Get logged-in user
+        file = request.FILES.get("aadhaar_pan_doc")
+
+        if not file:
+            return Response({"error": "No file provided"}, status=status.HTTP_400_BAD_REQUEST)
+
+        user.aadhaar_pan_doc = file
+        user.save()
+        return Response({"message": "Aadhaar document uploaded successfully", "aadhaar_pan_doc": user.aadhaar_pan_doc.url}, status=status.HTTP_200_OK)
+
 
 #contact page
 @api_view(["POST"])
