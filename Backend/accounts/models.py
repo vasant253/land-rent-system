@@ -14,6 +14,10 @@ class CustomUser(AbstractUser):
     is_landowner = models.BooleanField(default=False)  # Can upload land
     is_renter = models.BooleanField(default=False)  # Can rent land
 
+    aadhaar_pan_doc = models.FileField(upload_to='verification_docs/', blank=True, null=True)  
+    is_verified = models.BooleanField(default=False)  # ✅ Admin approval required
+
+
     def __str__(self):
         return self.username
     

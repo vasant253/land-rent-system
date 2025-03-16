@@ -51,7 +51,8 @@ const handleSuggestionClick = (suggestion) => {
 
   const handleLogout = () => {
       localStorage.clear(); // Removes all stored data
-      window.location.reload(); // Refresh the page to update UI
+      window.location.reload();
+      navigate("/login"); // Refresh the page to update UI
       setUser(null);
     };
 
@@ -125,10 +126,20 @@ const handleSuggestionClick = (suggestion) => {
             {token ? (
              <> 
              <li className="nav-item me-3">
-              <Link to="/landUpload" className="btn btn-primary fw-bold px-4 py-2">                  
-                    <i className="bi bi-cloud-upload"></i> Upload Land
-                </Link>
-                </li>
+            <Link
+              to={user?.is_verified ? "/landUpload" : "#"}
+              className="btn btn-primary fw-bold px-4 py-2"
+              onClick={(e) => {
+                if (!user?.is_verified) {
+                  e.preventDefault(); // Prevent navigation
+                  alert("Your account is not verified yet! Please wait until admin verify your account!.");
+                }
+              }}
+            >
+              <i className="bi bi-cloud-upload"></i> Upload Land
+            </Link>
+          </li>
+
               <li className="nav-item dropdown">
                 <button className="btn btn-outline-primary dropdown-toggle" data-bs-toggle="dropdown">
                   <FaUserCircle size={20} /> {user.username}

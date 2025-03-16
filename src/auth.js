@@ -47,8 +47,7 @@ const refreshAccessToken = async (refreshToken) => {
     return data.access;
   } catch (error) {
     console.error("Token refresh error:", error);
-    localStorage.removeItem("accessToken");
-    localStorage.removeItem("refreshToken");
+    localStorage.clear()
     return null;
   }
 };

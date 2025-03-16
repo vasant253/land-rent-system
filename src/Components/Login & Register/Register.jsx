@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import axios from "axios";
+import { Modal,Button } from "react-bootstrap";
 
 const UserRegistration = () => {
   const [formData, setFormData] = useState({
@@ -9,7 +10,8 @@ const UserRegistration = () => {
     email: "",
     phone: "",
     password: "",
-    profile_photo: null , // File upload
+    profile_photo: null ,
+    aadhaar_pan_doc: null, // File upload
   });
 
   const [isSendingOtp, setIsSendingOtp] = useState(false);
@@ -20,33 +22,38 @@ const UserRegistration = () => {
   const [error, setError] = useState(null);
   const [passwordStrength, setPasswordStrength] = useState("");
   const [errors, setErrors] = useState({});
+  const [showOtpModal, setShowOtpModal] = useState(false);
 
   // ✅ Handle input changes
   const handleChange = async (e) => {
-    const { name, value } = e.target;
-
-    if (name === "profile_photo") {
-      setFormData({ ...formData, profile_photo: e.target.files[0] });
+    const { name, value, type } = e.target;
+  
+    if (type === "file") {
+      setFormData((prevData) => ({
+        ...prevData,
+        [name]: e.target.files[0] || null, // ✅ Ensure file is set properly
+      }));
       return;
     }
-
+  
     setFormData({ ...formData, [name]: value });
-
+  
     if (name === "password") {
       checkPasswordStrength(value);
     }
-
+  
     if (["username", "email", "phone"].includes(name)) {
       try {
         const response = await axios.get(`http://127.0.0.1:8000/api/check-availability/?${name}=${value}`);
-        setErrors((prevErrors) => ({ ...prevErrors, [name]: "" })); // ✅ Clear error if available
+        setErrors((prevErrors) => ({ ...prevErrors, [name]: "" }));
       } catch (error) {
         if (error.response?.data[name]) {
-          setErrors((prevErrors) => ({ ...prevErrors, [name]: error.response.data[name] })); // ✅ Show error if taken
+          setErrors((prevErrors) => ({ ...prevErrors, [name]: error.response.data[name] }));
         }
       }
     }
   };
+  
 
   // ✅ Send OTP
   const sendOtp = async () => {
@@ -85,6 +92,20 @@ const UserRegistration = () => {
     }
   };
 
+  const handleSendOtp = async () => {
+    if (!formData.email.trim()) {
+      alert("Please enter your email before sending OTP."); // ✅ Show alert if empty
+      return;
+    }
+    await sendOtp(); // Send OTP
+    setShowOtpModal(true); // Open Modal
+  };
+
+  const handleVerifyOtp = async () => {
+    await verifyOtp(); // Verify OTP
+    setShowOtpModal(false); // Close Modal after verification
+  };
+
   // ✅ Submit Registration Form
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -120,7 +141,7 @@ const UserRegistration = () => {
   };
 
   return (
-    <div className="container d-flex justify-content-center align-items-center vh-100">
+    <div className="container d-flex justify-content-center align-items-center min-vh-100 py-5">
       <div className="card p-4 shadow-lg w-100" style={{ maxWidth: "450px", backgroundColor: "#f8f9fa" }}>
         <h3 className="text-center mb-3 text-primary fw-bold">Create an Account</h3>
 
@@ -144,7 +165,13 @@ const UserRegistration = () => {
           {/* ✅ Profile Photo */}
           <div className="mb-3">
             <label className="form-label fw-semibold">Profile Photo</label>
-            <input type="file" name="profile_photo" className="form-control" onChange={handleChange} />
+            <input type="file" accept="image/*" name="profile_photo" className="form-control" onChange={handleChange} />
+          </div>
+
+          {/* ✅ Adhar Photo */}
+          <div className="mb-3">
+            <label className="form-label fw-semibold">Upload Aadhaar/PAN (PDF or Image)</label>
+            <input type="file" accept=".jpg,.png,.pdf" name="aadhaar_pan_doc" className="form-control" onChange={handleChange} required />
           </div>
 
           {/* ✅ Phone */}
@@ -162,31 +189,45 @@ const UserRegistration = () => {
           </div>
 
           {/* ✅ Send OTP Button */}
-          {!otpSent && (
-    <button 
-        type="button" 
-        className="btn btn-primary w-100" 
-        onClick={sendOtp} 
-        disabled={isSendingOtp} // ✅ Disable button when loading
-    >
-        {isSendingOtp ? (
-            <>
-                <span className="spinner-border spinner-border-sm me-2"></span> 
-                Sending...
-            </>
-        ) : "Send OTP"}
-    </button>
+{!otpSent && (
+  <button 
+    type="button" 
+    className="btn btn-primary w-100" 
+    onClick={handleSendOtp} 
+    disabled={isSendingOtp || !formData.email.trim()} // ✅ Disable button when loading
+  >
+    {isSendingOtp ? (
+      <>
+        <span className="spinner-border spinner-border-sm me-2"></span> 
+        Sending...
+      </>
+    ) : "Send OTP"}
+  </button>
 )}
-          {/* ✅ OTP Input */}
-          {otpSent && !otpVerified && (
-            <>
-              <div className="mb-3">
-                <label className="form-label">Enter OTP</label>
-                <input type="text" name="otp" className="form-control" value={otp} onChange={(e) => setOtp(e.target.value)} required />
-              </div>
-              <button type="button" className="btn btn-success w-100" onClick={verifyOtp}>Verify OTP</button>
-            </>
-          )}
+
+{/* ✅ OTP Modal */}
+<Modal show={showOtpModal} onHide={() => setShowOtpModal(false)} centered>
+  <Modal.Header closeButton>
+    <Modal.Title>OTP Verification</Modal.Title>
+  </Modal.Header>
+  <Modal.Body>
+    <div className="mb-3">
+      <label className="form-label">Enter OTP</label>
+      <input 
+        type="text" 
+        name="otp" 
+        className="form-control" 
+        value={otp} 
+        onChange={(e) => setOtp(e.target.value)} 
+        required 
+      />
+    </div>
+  </Modal.Body>
+  <Modal.Footer>
+    <Button variant="secondary" onClick={() => setShowOtpModal(false)}>Close</Button>
+    <Button variant="success" onClick={handleVerifyOtp}>Verify OTP</Button>
+  </Modal.Footer>
+</Modal>
 
           {/* ✅ Password Input (Only Show If OTP Verified) */}
           {otpVerified && (

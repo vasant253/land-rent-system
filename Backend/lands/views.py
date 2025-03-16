@@ -5,7 +5,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from .models import Land,RentRequest
 from rest_framework.decorators import api_view, permission_classes
-from .serializers import LandSerializer
+from .serializers import LandSerializer, UserVerificationSerializer
 from rest_framework.permissions import AllowAny
 from .serializers import RentRequestSerializer
 
@@ -16,6 +16,9 @@ class LandUploadView(APIView):
     parser_classes = (MultiPartParser, FormParser)  # Needed for image uploads
 
     def post(self, request, *args, **kwargs):
+        if not request.user.is_verified:
+            return Response({"error": "Your account is not verified. Complete verification first."}, status=status.HTTP_403_FORBIDDEN)
+
         serializer = LandSerializer(data=request.data, context={"request": request})  # Pass request context
         if serializer.is_valid():
             serializer.save(status="Pending")
@@ -29,6 +32,19 @@ class LandUploadView(APIView):
         lands = Land.objects.filter(owner=request.user)
         serializer = LandSerializer(lands, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def upload_verification_doc(request):
+    """ ✅ Allows users to upload Aadhaar/PAN for verification """
+    user = request.user
+    serializer = UserVerificationSerializer(user, data=request.data, partial=True)
+
+    if serializer.is_valid():
+        serializer.save(is_verified=False)  # Reset verification until admin approves
+        return Response({"message": "Verification document uploaded successfully. Awaiting admin approval."}, status=status.HTTP_200_OK)
+
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 #get land by userid
 @api_view(["GET"])

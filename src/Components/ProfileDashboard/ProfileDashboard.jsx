@@ -36,7 +36,8 @@ const ProfileDashboard = () => {
         full_name: user?.full_name || "",
         email: user?.email || "",
         phone: user?.phone || "",
-        profile_photo: null
+        profile_photo: null,
+        aadhar_pan_doc:null,
     });
 
 
@@ -240,6 +241,14 @@ const handleRentRequestAction = async (id)=>{
                                 <Card.Text><strong>Full Name:</strong> {user.full_name || "N/A"}</Card.Text>
                                 <Card.Text><strong>Email:</strong> {user.email}</Card.Text>
                                 <Card.Text><strong>Phone:</strong> {user.phone || "N/A"}</Card.Text>
+                                <Card.Text>
+                                <strong>Aadhaar/Pan Verification:</strong>{" "}
+                                {user.is_verified ? (
+                                    <span className="text-success fw-bold">Verified ✅</span>
+                                ) : (
+                                    <span className="text-danger fw-bold">Not Verified ❌</span>
+                                )}
+                                </Card.Text>
                                 <Button variant="primary" onClick={() => handleEditProfile()}>Edit</Button>
                             </Col>
                         </Row>

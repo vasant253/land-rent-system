@@ -12,6 +12,12 @@ class LandImageSerializer(serializers.ModelSerializer):
         model = LandImage
         fields = ["id", "image"]
 
+class UserVerificationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CustomUser
+        fields = ['aadhaar_pan_doc', 'is_verified']
+        read_only_fields = ['is_verified'] 
+
 class LandSerializer(serializers.ModelSerializer):
     images = LandImageSerializer(many=True, read_only=True)
     uploaded_images = serializers.ListField(

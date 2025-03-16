@@ -3,7 +3,7 @@ from django.conf import settings
 from .views import RegisterUserView
 from .views import UserLoginView,UserListView, UserDetailView, get_user_details,update_profile
 from rest_framework_simplejwt.views import TokenRefreshView
-from .views import ProtectedView,check_availability,verify_otp,send_otp,get_user_profile,contact_form_submission
+from .views import ProtectedView,check_availability,verify_otp,send_otp,get_user_profile,contact_form_submission,verify_user
 
 urlpatterns = [
     path('register/', RegisterUserView.as_view(), name='register'),
@@ -15,6 +15,7 @@ urlpatterns = [
     path("users/<int:user_id>/", get_user_profile, name="get-user-profile"),
     path("protected-route/", ProtectedView.as_view(), name="protected-route"),
     path('usersList/', UserListView.as_view(), name='user-list'),
+    path("admin/users/<int:user_id>/verify/", verify_user, name="verify-user"),
     path('usersList/<int:pk>/', UserDetailView.as_view(), name='user-detail'),
     path("user/update/", update_profile, name="update_profile"),
     path("send-otp/", send_otp, name="send_otp"),

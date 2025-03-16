@@ -31,6 +31,7 @@ def get_user_details(request):
         "username": user.username,
         "email": user.email,
         "phone":user.phone,
+        "is_verified":user.is_verified,
         "full_name":user.full_name,
         "profile_photo": request.build_absolute_uri(user.profile_photo.url) if user.profile_photo else None,
     })
@@ -64,6 +65,18 @@ class RegisterUserView(APIView):
             serializer.save()
             return Response({'message': 'User registered successfully!'}, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(["PUT"])
+@permission_classes([IsAuthenticated])
+def verify_user(request, user_id):
+    """ ✅ Allows admin to verify users """
+    if request.user.role != "admin":  # ✅ Check role instead of is_staff
+        return Response({"error": "Unauthorized"}, status=status.HTTP_403_FORBIDDEN)
+
+    user = get_object_or_404(User, id=user_id)
+    user.is_verified = True
+    user.save()
+    return Response({"message": "User verified successfully."})
 
 # Real-time Validation View
 @api_view(["GET"])
