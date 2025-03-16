@@ -8,6 +8,12 @@ const ManageLands = () => {
   const [loading, setLoading] = useState(true);
   const [selectedLand, setSelectedLand] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const [showDocModal, setShowDocModal] = useState(false);
+  const [selectedLandDoc, setSelectedLandDoc] = useState(null);
+
+
+  const [filter, setFilter] = useState("all");
+
 
   useEffect(() => {
     fetchLands();
@@ -16,7 +22,7 @@ const ManageLands = () => {
   const fetchLands = async () => {
     try {
       const token = await getAccessToken();
-      const res = await axios.get("http://localhost:8000/landapi/lands/pending/", {
+      const res = await axios.get("http://localhost:8000/landapi/lands/", {
         headers: { Authorization: `Bearer ${token}` },
       });
       setLands(res.data);
@@ -26,6 +32,20 @@ const ManageLands = () => {
       setLoading(false);
     }
   };
+
+  const filteredLands = lands.filter((land) => {
+    if (filter === "approved") return land.status === "Approved";
+    if (filter === "pending") return land.status === "Pending";
+    if (filter === "rejected") return land.status === "Rejected";
+    return true; // Show all lands
+  });
+  
+
+  const handleShowDocument = (land) => {
+    setSelectedLandDoc(land.seven_twelve_doc);
+    setShowDocModal(true);
+  };
+  
 
   const handleShowDetails = (land) => {
     setSelectedLand(land);
@@ -57,6 +77,20 @@ const ManageLands = () => {
   return (
     <Container className="mt-4">
       <h2 className="text-center mb-4">Manage Lands</h2>
+      <div className="d-flex justify-content-between align-items-center mb-3">
+  <span className="fw-bold">Filter Lands:</span>
+  <select 
+    className="form-select w-auto" 
+    value={filter} 
+    onChange={(e) => setFilter(e.target.value)}
+  >
+    <option value="all">All Lands</option>
+    <option value="pending">Pending</option>
+    <option value="approved">Approved</option>
+    <option value="rejected">Rejected</option>
+  </select>
+</div>
+
       {loading ? (
         <div className="text-center">
           <Spinner animation="border" variant="primary" />
@@ -66,16 +100,16 @@ const ManageLands = () => {
           <thead className="table-dark">
             <tr>
               <th>ID</th>
-              <th>Owner</th>
               <th>Email</th>
               <th>Location</th>
               <th>Price</th>
               <th>Land Type</th>
+              <th>7/12 Doc</th>
               <th>Actions</th>
             </tr>
           </thead>
           <tbody>
-            {lands.map((land) => (
+            {filteredLands.map((land) => (
               <tr key={land.land_id}>
                   <td 
                   className="text-primary fw-bold text-decoration-underline"
@@ -84,11 +118,26 @@ const ManageLands = () => {
                 >
                   {land.land_id}
                 </td>
-                <td>{land.owner.full_name}</td>
                 <td>{land.owner.email}</td>
                 <td>{land.location}</td>
                 <td>₹{land.price}</td>
                 <td>{land.land_type}</td>
+                <td>
+                {land.seven_twelve_doc ? (
+                  <>
+                    <img
+                      src={`http://127.0.0.1:8000${land.seven_twelve_doc}`} // ✅ Show Image
+                      alt="7/12 Document"
+                      style={{ width: "50px", height: "50px", objectFit: "cover", cursor: "pointer", border: "1px solid #ddd", borderRadius: "5px" }}
+                      onClick={() => handleShowDocument(land)}
+                    />
+                  </>
+                ) : (
+                  <span className="text-danger">There is no document.</span>
+                )}
+              </td>
+
+                
                 <td>
                   <Button
                     variant="success"
@@ -143,15 +192,14 @@ const ManageLands = () => {
                 <div>
                   <h5>Land Images</h5>
                   <div className="d-flex flex-wrap" style={{ maxHeight: "200px", overflowY: "auto" }}>
-                    {selectedLand.images.map((image, index) => (
+                
                       <img
-                        key={index}
-                        src={image.image}
-                        alt={`Land ${index + 1}`}
+                        key={selectedLand.land_id}
+                        src={`http://127.0.0.1:8000${selectedLand.images[0].image}`}
+                        alt={`Land ${selectedLand.land_id}`}
                         className="m-2"
                         style={{ width: "120px", height: "100px", objectFit: "cover", border: "1px solid #ddd", borderRadius: "5px" }}
                       />
-                    ))}
                   </div>
                 </div>
               )}
@@ -175,6 +223,36 @@ const ManageLands = () => {
           )}
         </Modal.Footer>
       </Modal>
+
+      <Modal show={showDocModal} onHide={() => setShowDocModal(false)} size="lg" centered>
+  <Modal.Header closeButton>
+    <Modal.Title>7/12 Document</Modal.Title>
+  </Modal.Header>
+  <Modal.Body className="text-center">
+    {selectedLandDoc ? (
+      <>
+        <a href={`http://127.0.0.1:8000${selectedLandDoc}`} target="_blank" rel="noopener noreferrer">
+          <img
+            src={`http://127.0.0.1:8000${selectedLandDoc}`}
+            alt="7/12 Document"
+            style={{ maxWidth: "100%", maxHeight: "500px", border: "1px solid #ddd", borderRadius: "5px", cursor: "pointer" }}
+          />
+        </a>
+        <p className="mt-2">
+          <a href={`http://127.0.0.1:8000${selectedLandDoc}`} target="_blank" rel="noopener noreferrer" className="btn btn-outline-primary">
+            🔍 View Full Size
+          </a>
+        </p>
+      </>
+    ) : (
+      <p>No document available</p>
+    )}
+  </Modal.Body>
+  <Modal.Footer>
+    <Button variant="secondary" onClick={() => setShowDocModal(false)}>Close</Button>
+  </Modal.Footer>
+</Modal>
+
     </Container>
   );
 };

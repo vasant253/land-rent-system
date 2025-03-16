@@ -25,6 +25,8 @@ class Land(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    seven_twelve_doc = models.FileField(upload_to="land_documents/", blank=True, null=True, help_text="Upload 7/12 land document")
+
     def __str__(self):
         return f"{self.location} - {self.owner.username}"
 

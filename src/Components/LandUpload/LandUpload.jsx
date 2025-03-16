@@ -19,6 +19,7 @@ const LandUpload = () => {
     available_to: "",
     description: "",
     uploaded_images: [],
+    seven_twelve_doc:null,
   });
 
   const [userId, setUserId] = useState(null);
@@ -55,6 +56,17 @@ useEffect(() => {
     setShowConfirmation(true);
   };
 
+  const handleSevenTwelveUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setFormData((prevData) => ({
+        ...prevData,
+        seven_twelve_doc: file,
+      }));
+    }
+  };
+  
+
   // Final Submission
   const handleFinalSubmit = async () => {
     setShowConfirmation(false);
@@ -66,11 +78,16 @@ useEffect(() => {
     const data = new FormData();
     Object.keys(formData).forEach((key) => {
       if (key === "uploaded_images") {
-        formData.uploaded_images.forEach((image) => data.append("uploaded_images", image));
+        formData.uploaded_images.forEach((image) =>
+          data.append("uploaded_images", image)
+        );
+      } else if (key === "seven_twelve_doc" && formData[key]) {
+        data.append("seven_twelve_doc", formData[key]); // ✅ Append 7/12 Document
       } else {
         data.append(key, formData[key]);
       }
     });
+    
 
     data.append("owner", userId);
 
@@ -134,20 +151,20 @@ useEffect(() => {
             <input type="number" className="form-control" name="area" value={formData.area} onChange={handleChange} required />
           </div>
           <div className="col-md-6 mb-3">
-  <label className="form-label">Land Type: *</label>
-  <select
-    className="form-control"
-    name="land_type"
-    value={formData.land_type}
-    onChange={handleChange}
-    required
-  >
-    <option value="" disabled>Select Land Type</option>
-    <option value="Agricultural">Agricultural</option>
-    <option value="Commercial">Commercial</option>
-    <option value="Residential">Residential</option>
-  </select>
-</div>    
+          <label className="form-label">Land Type: *</label>
+          <select
+            className="form-control"
+            name="land_type"
+            value={formData.land_type}
+            onChange={handleChange}
+            required
+          >
+            <option value="" disabled>Select Land Type</option>
+            <option value="Agricultural">Agricultural</option>
+            <option value="Commercial">Commercial</option>
+            <option value="Residential">Residential</option>
+          </select>
+        </div>    
 
           {/* Row 4 */}
           <div className="col-md-6 mb-3">
@@ -195,6 +212,17 @@ useEffect(() => {
               ))}
             </div>
           </div>
+          <div className="col-md-12 mb-3">
+            <label className="form-label">Upload 7/12 Document (PDF/Image): *</label>
+            <input
+              type="file"
+              className="form-control"
+              accept=".jpg,.png,.pdf"
+              onChange={handleSevenTwelveUpload}
+              required
+            />
+          </div>
+
         </div>
         <button type="submit" className="btn btn-success">Submit</button>
       </form>

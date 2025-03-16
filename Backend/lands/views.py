@@ -33,6 +33,14 @@ class LandUploadView(APIView):
         serializer = LandSerializer(lands, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+class AllLandsView(APIView):
+    permission_classes = [IsAuthenticated]  # Ensure only authenticated users can access this
+
+    def get(self, request):
+        lands = Land.objects.all()  # Fetch all lands
+        serializer = LandSerializer(lands, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def upload_verification_doc(request):
@@ -67,6 +75,8 @@ def get_land_details(request, id):
     land = get_object_or_404(Land, land_id=id,status="Approved")
     serializer = LandSerializer(land)
     return Response(serializer.data)
+
+
 
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])

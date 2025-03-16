@@ -3,9 +3,10 @@ from .views import LandUploadView,land_list_create,get_land_details,create_rent_
 from django.conf import settings
 from django.conf.urls.static import static
 from .views import get_user_lands,edit_land,delete_land,search_lands,suggest_lands,get_user_lands_by_id
-from .views import get_pending_lands,manage_land_status
+from .views import get_pending_lands,manage_land_status,AllLandsView
 
 urlpatterns = [
+    path("lands/", AllLandsView.as_view(), name="all-lands"),  # New endpoint to fetch all lands
     path("upload-land/", LandUploadView.as_view(), name="upload_land"),
     path('lands-fetch/', land_list_create, name='land-list-create'),
     path("lands/<int:id>/", get_land_details, name="get_land_details"),

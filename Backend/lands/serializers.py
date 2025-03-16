@@ -31,7 +31,7 @@ class LandSerializer(serializers.ModelSerializer):
             "land_id", "owner", "location", "state","status", "district", "area", "land_type",
             "utilities_available", "soil_quality", "land_access", "price", "land_status",
             "available_from", "available_to", "description", "created_at", "updated_at",
-            "images", "uploaded_images"
+            "images", "uploaded_images","seven_twelve_doc"
         ]
         read_only_fields = ["owner", "created_at", "updated_at"]
 

@@ -7,7 +7,7 @@ class LandImageInline(admin.TabularInline):  # Allows multiple images to be adde
 
 @admin.register(Land)
 class LandAdmin(admin.ModelAdmin):
-    list_display = ("land_id", "owner", "location", "state","status", "district", "price", "land_status", "created_at")
+    list_display = ("land_id", "owner","seven_twelve_doc", "location", "state","status", "district", "price", "land_status", "created_at")
     list_filter = ("state", "land_status", "land_type")
     search_fields = ("location", "owner__username", "state", "district", "land_type")
     ordering = ("-created_at",)
