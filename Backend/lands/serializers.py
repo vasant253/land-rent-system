@@ -5,7 +5,7 @@ from accounts.models import CustomUser  # Import CustomUser from accounts app
 class OwnerSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
-        fields = ["id", "full_name", "email", "phone", "profile_photo"]
+        fields = ["id","username", "full_name", "email", "phone", "profile_photo"]
 
 class LandImageSerializer(serializers.ModelSerializer):
     class Meta:
@@ -52,9 +52,9 @@ class LandSerializer(serializers.ModelSerializer):
 
 class RentRequestSerializer(serializers.ModelSerializer):
     renter_name = serializers.CharField(source="renter.username", read_only=True)
-    owner_name = serializers.CharField(source="owner.username", read_only=True)
-    land_name = serializers.CharField(source="land.name", read_only=True)
+    owner = OwnerSerializer(read_only=True)
+    land=LandSerializer(read_only=True)
 
     class Meta:
         model = RentRequest
-        fields = ["id", "renter", "renter_name", "owner", "owner_name", "land", "land_name", "status", "request_date"]
+        fields = ["id", "renter", "renter_name", "owner", "land", "status", "request_date"]

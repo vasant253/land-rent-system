@@ -94,12 +94,23 @@ const UserRegistration = () => {
 
   const handleSendOtp = async () => {
     if (!formData.email.trim()) {
-      alert("Please enter your email before sending OTP."); // ✅ Show alert if empty
+      alert("Please enter your email before sending OTP.");
       return;
     }
-    await sendOtp(); // Send OTP
-    setShowOtpModal(true); // Open Modal
+  
+    setIsSendingOtp(true); // ✅ Start loading animation
+  
+    try {
+      await sendOtp(); // ✅ Send OTP
+      setShowOtpModal(true); // ✅ Open OTP modal
+    } catch (error) {
+      console.error("Error sending OTP:", error);
+      alert("Failed to send OTP. Please try again.");
+    } finally {
+      setIsSendingOtp(false); // ✅ Stop loading animation
+    }
   };
+  
 
   const handleVerifyOtp = async () => {
     await verifyOtp(); // Verify OTP
@@ -132,6 +143,8 @@ const UserRegistration = () => {
       if (response.status === 201) {
         setMessage("Registration Successful! ✅");
         setFormData({ username: "", full_name: "", email: "", phone: "", password: "", profile_photo: null });
+        alert("Registration Successful! ✅");
+        window.location.reload(); 
       } else {
         setError(response.data.message || "Registration failed.");
       }
@@ -189,7 +202,7 @@ const UserRegistration = () => {
           </div>
 
           {/* ✅ Send OTP Button */}
-{!otpSent && (
+{!otpVerified && (
   <button 
     type="button" 
     className="btn btn-primary w-100" 
@@ -206,7 +219,7 @@ const UserRegistration = () => {
 )}
 
 {/* ✅ OTP Modal */}
-<Modal show={showOtpModal} onHide={() => setShowOtpModal(false)} centered>
+<Modal show={showOtpModal} onHide={() =>{}} centered>
   <Modal.Header closeButton>
     <Modal.Title>OTP Verification</Modal.Title>
   </Modal.Header>

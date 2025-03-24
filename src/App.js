@@ -21,7 +21,7 @@ import FilteredLands from './Components/LandList/FilteredLands';
 import PublicProfile from './Components/ProfileDashboard/PublicProfile';
 import Contact from './Components/Contact Page/Contact';
 import ManageLands from './Components/AdminManage/ManageLands';
-
+import UserRentRequests from './Components/RentRequest/UserRentRequests';
 
 
 function App() {
@@ -63,6 +63,7 @@ function App() {
             <Route path="/lands/:category" element={<FilteredLands />} />
             <Route path="/search" element={<SearchResults />} />
             <Route path="/contact" element={<Contact />} />
+            <Route path="/rent-requests" element={<UserRentRequests />} />
             <Route path="/admin" element={<PrivateRoute element={<AdminDashboard />} allowedRole="admin" />} />
             <Route path="/profile" element={<ProfileDashboard />} />
             <Route path="/dashboard" element={<PrivateRoute element={<UserDashboard />} allowedRole="user" />} /> 

@@ -48,6 +48,7 @@ const refreshAccessToken = async (refreshToken) => {
   } catch (error) {
     console.error("Token refresh error:", error);
     localStorage.clear()
+    window.location.reload();
     return null;
   }
 };

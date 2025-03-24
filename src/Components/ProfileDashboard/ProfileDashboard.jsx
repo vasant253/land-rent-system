@@ -3,9 +3,10 @@ import axios from "axios";
 import { Container, Card, Row, Col } from "react-bootstrap";
 import { Button, Modal, Form } from "react-bootstrap";
 import { getAccessToken } from "../../auth";
-import { Link } from "react-router-dom";
+import { Link,useNavigate } from "react-router-dom";
 
 const ProfileDashboard = () => {
+    const navigate=useNavigate();
     
     //user data
     const [user, setUser] = useState(null);
@@ -18,6 +19,7 @@ const ProfileDashboard = () => {
 
 
     //land data
+    const [filter, setFilter] = useState("all");
     const [lands, setLands] = useState([]);
     const [showEditModal, setShowEditModal] = useState(false);
     const [selectedLand, setSelectedLand] = useState(null);
@@ -55,6 +57,11 @@ const ProfileDashboard = () => {
         
     }, []);
 
+    const filteredLands = lands.filter((land) => {
+        if (filter === "all") return true;
+        return land.status.toLowerCase() === filter;
+    });
+    
     const fetchUserData = async () => {
         try {
             const token = await getAccessToken(); // Get JWT Token
@@ -226,9 +233,29 @@ const fetchLandRequests = async (landId) => {
     }
 };
 
-const handleRentRequestAction = async (id)=>{
-    return id;
-}
+const handleRentRequestAction = async (requestId, action) => {
+    try {
+        const token = await getAccessToken();
+        const response = await axios.put(
+            `http://127.0.0.1:8000/landapi/rent-requests/${requestId}/`, 
+            { status: action === "accept" ? "Accepted" : "Rejected" }, 
+            { headers: { Authorization: `Bearer ${token}` } }
+        );
+
+        // ✅ Update UI Immediately
+        setSelectedLandRequests((prevRequests) =>
+            prevRequests.map((req) =>
+                req.id === requestId ? { ...req, status: action === "accept" ? "Accepted" : "Rejected" } : req
+            )
+        );
+
+        alert(`Request ${action}ed successfully.`);
+    } catch (error) {
+        console.error(`Error ${action}ing rent request:`, error);
+        alert("Failed to update request. Try again.");
+    }
+};
+
 
 // ✅ Handle File Selection
 const handleUploadAadhaar = (e) => {
@@ -323,8 +350,21 @@ const uploadAadhaar = async () => {
             )}
         <div className="container mt-4">
             <h3>My Lands</h3>
+            <div className="d-flex justify-content-between align-items-center mb-3">
+                <span className="fw-bold">Filter Lands:</span>
+                <select 
+                    className="form-select w-auto" 
+                    value={filter} 
+                    onChange={(e) => setFilter(e.target.value)}
+                >
+                    <option value="all">All Lands</option>
+                    <option value="pending">Pending</option>
+                    <option value="approved">Approved</option>
+                    <option value="rejected">Rejected</option>
+                </select>
+                </div>
             <div className="row">
-                {lands.map((land) => (
+                {filteredLands.map((land) => (
                     <div key={land.id} className="col-md-4">
                         <div className="card mb-3">
                             <div className="card-body">

@@ -138,7 +138,9 @@ const ManageLands = () => {
               </td>
 
                 
-                <td>
+              <td>
+              {land.status === "Pending" ? (
+                <>
                   <Button
                     variant="success"
                     size="sm"
@@ -154,7 +156,14 @@ const ManageLands = () => {
                   >
                     ❌ Reject
                   </Button>
-                </td>
+                </>
+              ) : (
+                <span className={`fw-bold text-${land.status === "Approved" ? "success" : "danger"}`}>
+                  {land.status}
+                </span>
+              )}
+            </td>
+
               </tr>
             ))}
           </tbody>

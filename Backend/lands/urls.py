@@ -3,7 +3,7 @@ from .views import LandUploadView,land_list_create,get_land_details,create_rent_
 from django.conf import settings
 from django.conf.urls.static import static
 from .views import get_user_lands,edit_land,delete_land,search_lands,suggest_lands,get_user_lands_by_id
-from .views import get_pending_lands,manage_land_status,AllLandsView
+from .views import get_pending_lands,manage_land_status,AllLandsView,ApprovedLandsView,UserRentRequestsView,CancelRentRequestView, RentRequestUpdateView
 
 urlpatterns = [
     path("lands/", AllLandsView.as_view(), name="all-lands"),  # New endpoint to fetch all lands
@@ -14,12 +14,16 @@ urlpatterns = [
     path("rent-request/manage/<int:request_id>/", manage_rent_request, name="manage_rent_request"),
     path("get-land-requests/<int:land_id>/", get_land_requests, name="land_requests"),
     path("user/lands/", get_user_lands, name="user_lands"),
+    path("user/rent-requests/", UserRentRequestsView.as_view(), name="user-rent-requests"),
     path("lands/<int:land_id>/edit/", edit_land, name="edit_land"),
     path("lands/<int:land_id>/delete/", delete_land, name="delete_land"),
+    path("approved-lands/", ApprovedLandsView.as_view(), name="approved-lands"),
     path("search/", search_lands, name="search_lands"),
+    path("rent-requests/<int:request_id>/cancel/", CancelRentRequestView.as_view(), name="cancel-rent-request"),
     path("suggest/", suggest_lands, name="suggest_lands"),
     path("lands/user/<int:user_id>/", get_user_lands_by_id, name="get-user-lands"),
     path("lands/pending/", get_pending_lands, name="get-pending-lands"),
+    path("rent-requests/<int:request_id>/", RentRequestUpdateView.as_view(), name="update-rent-request"),
     path("lands/<int:id>/status/", manage_land_status, name="manage-land-status"),
 
 ]

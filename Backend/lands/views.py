@@ -8,6 +8,7 @@ from rest_framework.decorators import api_view, permission_classes
 from .serializers import LandSerializer, UserVerificationSerializer
 from rest_framework.permissions import AllowAny
 from .serializers import RentRequestSerializer
+from django.core.mail import send_mail
 
 from django.shortcuts import get_object_or_404
 
@@ -76,8 +77,6 @@ def get_land_details(request, id):
     serializer = LandSerializer(land)
     return Response(serializer.data)
 
-
-
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def get_user_lands(request):
@@ -85,6 +84,13 @@ def get_user_lands(request):
     lands = Land.objects.filter(owner=user)
     serializer = LandSerializer(lands, many=True)
     return Response(serializer.data)
+
+@permission_classes([AllowAny])
+class ApprovedLandsView(APIView):
+    def get(self, request):
+        approved_lands = Land.objects.filter(status="Approved")
+        serializer = LandSerializer(approved_lands, many=True)
+        return Response(serializer.data)
 
 @api_view(["DELETE"])
 @permission_classes([IsAuthenticated])
@@ -167,7 +173,6 @@ def suggest_lands(request):
 
     return Response(suggestions, status=status.HTTP_200_OK)
 
-
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def create_rent_request(request, land_id):
@@ -241,6 +246,15 @@ def get_land_requests(request, land_id=None):
     serializer = RentRequestSerializer(rent_requests, many=True)
     return Response(serializer.data)
 
+class UserRentRequestsView(APIView):
+    permission_classes = [IsAuthenticated]  # Only logged-in users can access
+
+    def get(self, request):
+        user = request.user
+        rent_requests = RentRequest.objects.filter(renter=user)  # Fetch user's rent requests
+        serializer = RentRequestSerializer(rent_requests, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def get_pending_lands(request):
@@ -272,3 +286,47 @@ def manage_land_status(request, id):
     land.save()
     return Response({"message": f"Land {action}d successfully."})
 
+class RentRequestUpdateView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def put(self, request, request_id):
+        try:
+            rent_request = RentRequest.objects.get(id=request_id, owner=request.user)
+
+            new_status = request.data.get("status")
+            if new_status not in ["Accepted", "Rejected"]:
+                return Response({"error": "Invalid status update"}, status=status.HTTP_400_BAD_REQUEST)
+
+            rent_request.status = new_status
+            rent_request.save()
+
+            # ✅ Send Email to Renter if Accepted
+            if new_status == "Accepted":
+                send_mail(
+                    subject="Land Rent Request Accepted ✅",
+                    message=f"Dear {rent_request.renter.full_name},\n\n"
+                            f"Your rent request for {rent_request.land.location} has been accepted.\n"
+                            f"Contact the owner at {rent_request.owner.email} for further steps.\n\n"
+                            f"Visit your dashboard to complete the payment.",
+                    from_email="admin@landrent.com",
+                    recipient_list=[rent_request.renter.email],
+                    fail_silently=True,
+                )
+
+            return Response({"message": f"Rent request {new_status.lower()} successfully for {rent_request.owner.username}"}, status=status.HTTP_200_OK)
+
+        except RentRequest.DoesNotExist:
+            return Response({"error": "Rent request not found or unauthorized"}, status=status.HTTP_404_NOT_FOUND)
+
+class CancelRentRequestView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def delete(self, request, request_id):
+        try:
+            rent_request = RentRequest.objects.get(id=request_id, renter=request.user)
+            if rent_request.status == "Pending":
+                rent_request.delete()
+                return Response({"message": "Rent request canceled successfully."}, status=status.HTTP_200_OK)
+            return Response({"error": "Only pending requests can be canceled."}, status=status.HTTP_400_BAD_REQUEST)
+        except RentRequest.DoesNotExist:
+            return Response({"error": "Rent request not found."}, status=status.HTTP_404_NOT_FOUND)
